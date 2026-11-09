@@ -173,6 +173,25 @@ body.pop .crp-kv-label{
 }
 body.pop .crp-kv-value{ color:var(--crp-text); font-size:14px; font-weight:600; overflow-wrap:anywhere; }
 body.pop .crp-kv-value.is-empty{ color:#9AA8C2; font-weight:400; }
+/* ---------- Solicitante e abertura ---------- */
+body.pop .crp-req-grid{
+  display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:12px;
+}
+body.pop .crp-kv.crp-kv-ic{ flex-direction:row; align-items:center; gap:14px; padding:14px 16px; }
+body.pop .crp-kv-body{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+body.pop .crp-kv-sub{ color:var(--crp-muted); font-size:12px; overflow-wrap:anywhere; }
+body.pop .crp-kv-avatar{
+  flex:0 0 42px; width:42px; height:42px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--crp-blue); color:#fff; font-size:14px; font-weight:700;
+}
+body.pop .crp-kv-avatar-soft{ background:var(--crp-read); color:var(--crp-blue); }
+body.pop .crp-kv-avatar svg{ width:20px; height:20px; display:block; }
+body.pop .crp-req-raw #RequesterInfo{ margin:0 !important; padding:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; }
+@media (max-width:700px){
+  body.pop .crp-req-grid{ grid-template-columns:minmax(0,1fr); }
+}
+
 body.pop .crp-summary-raw h4{ margin:0 !important; font-size:14px !important; line-height:1.8 !important; color:var(--crp-text-2) !important; }
 
 /* ---------- Passo a passo ---------- */
