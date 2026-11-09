@@ -13,6 +13,8 @@
     anexos: SVG + '<path d="M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
     historico: SVG + '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
     info: SVG + '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>',
+    user: SVG + '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+    calendar: SVG + '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
     hero: SVG + '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6"/></svg>'
   };
 
@@ -81,7 +83,6 @@
     }
 
     var heroIcon = icon('hero', 'crp-hero-icon');
-    var req = document.getElementById('RequesterInfo');
 
     // Coluna esquerda = bloco (span*) que contém o título
     var left = null;
@@ -102,11 +103,6 @@
         heading.appendChild(h1);
         heading.appendChild(badge);
       }
-      if (req) {
-        var r = el('div', 'crp-hero-requester');
-        r.appendChild(req);
-        text.appendChild(r);
-      }
       if (left.parentNode) {
         left.parentNode.classList.add('crp-hero-row');
         toArr(left.parentNode.children).forEach(function (c) {
@@ -116,12 +112,78 @@
     } else {
       title.insertBefore(heroIcon, title.firstChild);
       if (badge && h1) h1.parentNode.insertBefore(badge, h1.nextSibling);
-      if (req) {
-        var rr = el('div', 'crp-hero-requester');
-        rr.appendChild(req);
-        title.appendChild(rr);
+    }
+  }
+
+  /* ---------- Card: solicitante + data de abertura ---------- */
+  function openingDate() {
+    var t = document.getElementById('TableStep');
+    if (!t) return null;
+    var cols = stepColumns(t);
+    var first = toArr(t.querySelectorAll('tbody > tr')).filter(function (tr) {
+      return !isStepHead(tr) && txt(tr);
+    })[0];
+    var raw = first && first.children[cols.start] ? txt(first.children[cols.start]) : '';
+    if (!raw) return null;
+    var d = raw.match(/\d{2}\/\d{2}\/\d{4}/);
+    var h = raw.match(/\d{2}:\d{2}(:\d{2})?/);
+    return { date: d ? d[0] : raw.split(/\s+/)[0], time: h ? h[0] : '' };
+  }
+
+  function kvBox(iconNode, label, value, sub) {
+    var box = el('div', 'crp-kv crp-kv-ic');
+    box.appendChild(iconNode);
+    var body = el('div', 'crp-kv-body');
+    body.appendChild(el('span', 'crp-kv-label', label));
+    body.appendChild(el('span', 'crp-kv-value' + (value ? '' : ' is-empty'), value || '—'));
+    if (sub) body.appendChild(el('span', 'crp-kv-sub', sub));
+    box.appendChild(body);
+    return box;
+  }
+
+  function initRequesterCard() {
+    if (document.querySelector('.crp-requester-card')) return;
+    var req = document.getElementById('RequesterInfo');
+    var opened = openingDate();
+    if (!req && !opened) return;
+
+    var card = el('div', 'crp-card crp-requester-card');
+    card.appendChild(cardHeader('SOLICITAÇÃO', 'Solicitante e abertura', null, 'user'));
+    var grid = el('div', 'crp-req-grid');
+
+    if (req) {
+      var strong = req.querySelector('strong');
+      var name = txt(strong).replace(/\s*\([^)]*\)\s*$/, '');
+      var mail = txt(req.querySelector('.small'));
+      if (!mail) {
+        var pm = txt(strong).match(/\(([^)]+@[^)]+)\)/);
+        if (pm) mail = pm[1].toLowerCase();
+      }
+      if (name) {
+        var av = el('span', 'crp-kv-avatar', initials(name));
+        av.setAttribute('aria-hidden', 'true');
+        grid.appendChild(kvBox(av, 'Solicitante', name, mail));
+        req.classList.add('crp-src-hidden');
+      } else {
+        // estrutura inesperada: mostra o bloco original dentro do card
+        var holder = el('div', 'crp-kv crp-req-raw');
+        holder.appendChild(req);
+        grid.appendChild(holder);
       }
     }
+
+    var cal = icon('calendar', 'crp-kv-avatar crp-kv-avatar-soft');
+    grid.appendChild(kvBox(cal, 'Aberto em', opened ? opened.date : '', opened && opened.time ? 'às ' + opened.time : ''));
+
+    card.appendChild(grid);
+
+    var step = document.getElementById('PanelStep');
+    var anchor = document.querySelector('.crp-summary-card:not(.crp-src-hidden)');
+    if (!anchor && step) {
+      anchor = step.closest('.box.spaced');
+      if (!anchor || anchor.contains(document.getElementById('PanelForm'))) anchor = step;
+    }
+    if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(card, anchor);
   }
 
   /* ---------- Resumo: "Rótulo: valor | Rótulo: valor" vira grade ---------- */
@@ -375,6 +437,7 @@
 
     initHeader();
     initSummary();
+    initRequesterCard();
     setupSteps();
 
     var msg = document.getElementById('PanelMessage');
