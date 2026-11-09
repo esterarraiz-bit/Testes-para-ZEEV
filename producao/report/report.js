@@ -442,15 +442,39 @@
   function buildBottomBar() {
     var nav = document.querySelector('.title ul.nav');
     if (!nav || document.getElementById('crp-bottom-bar')) return;
+
+    var dd = nav.querySelector('li.dropdown');
+    var menu = dd && dd.querySelector('.dropdown-menu');
+    if (!menu) return;
+
+    var order = ['LkEdit', 'LkHoldShowOn', 'LkDelete', 'LkCancel'];
+    var keyOf = { LkEdit: 'edit', LkHoldShowOn: 'hold', LkDelete: 'delete', LkCancel: 'cancel' };
+    var items = {};
+    Array.prototype.forEach.call(menu.children, function (li) {
+      var a = li.querySelector('a');
+      if (!a || !a.id || !keyOf[a.id]) return;
+      li.classList.add('crp-ab-' + keyOf[a.id]);
+      items[a.id] = li;
+    });
+
+    var list = el('ul', 'crp-bottom-bar-actions');
+    order.forEach(function (id) {
+      if (items[id]) list.appendChild(items[id]); // move o próprio li (mantém handlers)
+    });
+    if (!list.children.length) return;
+
     var bar = el('div', 'crp-bottom-bar');
     bar.id = 'crp-bottom-bar';
     bar.setAttribute('role', 'toolbar');
     bar.setAttribute('aria-label', 'Ações da solicitação');
     var inner = el('div', 'crp-bottom-bar-inner');
-    inner.appendChild(nav); // move o próprio ul.nav (mantém handlers/dropdown)
+    inner.appendChild(el('span', 'crp-bottom-bar-label', 'Ações da solicitação'));
+    inner.appendChild(list);
     bar.appendChild(inner);
     document.body.appendChild(bar);
     document.body.classList.add('crp-has-bottom-bar');
+
+    if (dd && dd.parentNode) dd.parentNode.removeChild(dd);
   }
 
   /* ---------- Abas ---------- */
