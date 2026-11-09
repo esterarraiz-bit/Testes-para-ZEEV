@@ -1491,7 +1491,7 @@
   background: var(--p-navy) !important;
   color: #FFFFFF !important;
   font-weight: 600 !important;
-  box-shadow: 0 2px 6px rgba(31, 63, 142, .22);
+  box-shadow: 0 2px 6px rgba(31, 63, 142, .22) !important;
   transition: background-color .15s ease, border-color .15s ease,
               box-shadow .15s ease, color .15s ease;
 }
@@ -1499,9 +1499,10 @@
 #containerRequest.crp-proto.crp-workspace #controllers .crp-save-button:disabled,
 #containerRequest.crp-proto.crp-workspace #controllers .crp-save-button.disabled {
   border-color: var(--p-card-border) !important;
-  background: #EFF3FB !important;
-  color: #9AA7C4 !important;
-  box-shadow: none;
+  background: #F0F4FB !important;
+  color: #8A97B4 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
   cursor: not-allowed;
 }
 #containerRequest.crp-proto.crp-workspace #controllers .crp-save-button::before {
@@ -1519,7 +1520,7 @@
 #containerRequest.crp-proto.crp-workspace #controllers .crp-save-button:not(:disabled):not(.disabled):hover {
   border-color: var(--p-navy-hover) !important;
   background-color: var(--p-navy-hover) !important;
-  box-shadow: 0 4px 12px rgba(31, 63, 142, .26);
+  box-shadow: 0 4px 12px rgba(31, 63, 142, .26) !important;
 }
 #containerRequest.crp-proto.crp-workspace #controllers .crp-save-button:focus-visible {
   outline: 2px solid var(--p-navy) !important;
