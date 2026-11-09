@@ -336,10 +336,8 @@
           tr.classList.add('crp-full');
         }
         if (tds.length === 1) tr.classList.add('crp-note');
-        var val = tr.querySelector('td.col1');
-        if (val && !txt(val) && !val.querySelector('img,a,table,input:not([type="hidden"]),select,textarea,iframe')) {
-          val.classList.add('crp-val-empty');
-        }
+        // (Marcador de campo vazio removido: era aplicado antes do Zeev
+        // preencher os valores e acabava aparecendo em todos os campos.)
       });
 
       var groupRow = rows.filter(function (tr) { return tr.classList.contains('group'); })[0];
@@ -371,6 +369,21 @@
       td.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
       });
+    });
+  }
+
+  /* Campo de máscara vazio (ex.: CEP "_____-___"): esconde os "_" e mostra "—" */
+  function markMaskEmpty() {
+    var form = document.getElementById('PanelForm');
+    if (!form) return;
+    toArr(form.querySelectorAll('td.col1 div[xtype]')).forEach(function (node) {
+      if (node.getAttribute('data-crp-mask') === '1') return;
+      if (node.querySelector('a,img,table')) return;
+      var t = (node.textContent || '').trim();
+      if (!t) return;
+      if (t.indexOf('_') >= 0 && /^[\s_\-\.\/()]+$/.test(t)) {
+        node.setAttribute('data-crp-mask', '1');
+      }
     });
   }
 
@@ -533,6 +546,9 @@
 
     setupForm(form);
     setupMessages();
+    markMaskEmpty();
+    setTimeout(markMaskEmpty, 1200);
+    setTimeout(markMaskEmpty, 2600);
     return true;
   }
 

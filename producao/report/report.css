@@ -359,8 +359,12 @@ body.pop #PanelForm table.form > tbody > tr > td.col1{
   color:var(--crp-text) !important; overflow-wrap:anywhere !important;
   min-height:20px;
 }
-body.pop #PanelForm table.form > tbody > tr > td.col1.crp-val-empty::before{
-  content:"—"; color:#9AA8C2; font-weight:400;
+/* Valor vazio NÃO recebe marcador (evita "—" em todos os campos).
+   Máscara vazia (ex.: CEP "_____-___"): esconde os "_" e mostra "—". */
+body.pop #PanelForm table.form > tbody > tr > td.col1.crp-val-empty::before{ content:none !important; }
+body.pop #PanelForm td.col1 [data-crp-mask="1"]{ font-size:0 !important; color:transparent !important; }
+body.pop #PanelForm td.col1 [data-crp-mask="1"]::after{
+  content:"—"; font-size:14px; color:#9AA8C2; font-weight:400;
 }
 /* linha cheia: textos de ajuda, anexos, multivaloradas, textareas */
 body.pop #PanelForm table.form > tbody > tr.crp-full,
@@ -376,7 +380,7 @@ body.pop #PanelForm table.form > tbody > tr.crp-note > td *{ text-align:left !im
 /* Multivaloradas */
 body.pop #PanelForm .table-responsive{ margin:0 0 14px !important; overflow-x:auto; border:0 !important; }
 body.pop #PanelForm table[mult="S"]{
-  width:100% !important; margin:0 0 14px !important;
+  width:100% !important; max-width:1100px; margin:0 auto 14px !important;
   border:1px solid var(--crp-border) !important; border-radius:var(--crp-radius-inner) !important;
   border-collapse:separate !important; border-spacing:0 !important;
   background:#fff !important; font-size:13px !important; overflow:hidden;
