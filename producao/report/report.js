@@ -470,7 +470,6 @@
     bar.setAttribute('role', 'toolbar');
     bar.setAttribute('aria-label', 'Ações da solicitação');
     var inner = el('div', 'crp-bottom-bar-inner');
-    inner.appendChild(el('span', 'crp-bottom-bar-label', 'Ações da solicitação'));
     inner.appendChild(list);
     bar.appendChild(inner);
     document.body.appendChild(bar);

@@ -512,12 +512,8 @@ body.pop #crp-bottom-bar{
   border-top:1px solid var(--crp-border); box-shadow:0 -6px 20px rgba(5,63,136,.10);
 }
 body.pop .crp-bottom-bar-inner{
-  max-width:1180px; margin:0 auto; padding:10px var(--crp-gutter);
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-body.pop .crp-bottom-bar-label{
-  color:var(--crp-muted); font-size:12px; font-weight:700;
-  letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
+  padding:10px var(--crp-gutter);
+  display:flex; align-items:center; justify-content:flex-end; gap:12px;
 }
 body.pop .crp-bottom-bar-actions{
   display:flex; align-items:center; gap:10px; margin:0 !important; padding:0; list-style:none !important;
@@ -560,7 +556,6 @@ body.pop .crp-ab-cancel a:hover{ background:#C42B2F; border-color:#C42B2F; }
   body.pop #PanelForm table.form > tbody > tr.group{ margin:0 -14px !important; }
   body.pop .crp-report-tab{ flex:1 1 100%; }
   body.pop #tblMessage tbody > tr,body.pop #tblFile tbody > tr{ padding:10px 12px !important; }
-  body.pop .crp-bottom-bar-label{ display:none; }
   body.pop .crp-bottom-bar-actions{ width:100%; justify-content:flex-end; overflow-x:auto; }
   body.pop .crp-bottom-bar-actions a{ height:38px; padding:0 12px; font-size:13px; }
 }
