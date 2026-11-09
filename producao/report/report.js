@@ -1,23 +1,44 @@
 /* CRP | Relatório de Detalhamento (audit-legacy) — redesign no padrão dos
    formulários CRP. Preserva o DOM, IDs, valores e integrações do Zeev;
-   apenas reorganiza/apresenta (abas, accordions, cabeçalho, timeline). */
+   apenas reorganiza/apresenta (cards, abas, accordions, cabeçalho, timeline). */
 (function () {
   'use strict';
   if (window.__crpReportRedesign) return;
   window.__crpReportRedesign = true;
 
+  var SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">';
   var ICONS = {
-    geral: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>',
-    mensagens: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.6A8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/></svg>',
-    anexos: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
-    historico: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>'
+    geral: SVG + '<path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>',
+    mensagens: SVG + '<path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.5 8.6 8.6 0 0 1-3.9-.9L3 21l1.9-5.6A8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/></svg>',
+    anexos: SVG + '<path d="M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>',
+    historico: SVG + '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+    info: SVG + '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>',
+    hero: SVG + '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6"/></svg>'
   };
+
+  var toArr = function (list) { return Array.prototype.slice.call(list || []); };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function icon(key, cls) {
+    var s = el('span', cls);
+    s.setAttribute('aria-hidden', 'true');
+    s.innerHTML = ICONS[key] || '';
+    return s;
+  }
+
+  function txt(node) { return node ? String(node.innerText || node.textContent || '').trim() : ''; }
 
   function countRows(tableId) {
     var t = document.getElementById(tableId);
     if (!t) return 0;
     var n = 0;
-    Array.prototype.forEach.call(t.querySelectorAll('tbody > tr'), function (tr) {
+    toArr(t.querySelectorAll('tbody > tr')).forEach(function (tr) {
       if (tr.querySelector('.alert')) return;
       if (tr.children.length === 1 && tr.firstElementChild.hasAttribute('colspan') && !tr.querySelector('a,img,strong')) return;
       n++;
@@ -31,96 +52,250 @@
     return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
   }
 
-  function el(tag, cls, text) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
+  function cardHeader(eyebrow, title, badge, iconKey) {
+    var head = el('div', 'crp-card-head');
+    head.appendChild(icon(iconKey || 'geral', 'crp-card-ic'));
+    var texts = el('div', 'crp-card-head-text');
+    texts.appendChild(el('span', 'crp-card-eyebrow', eyebrow));
+    texts.appendChild(el('h3', 'crp-card-heading', title));
+    head.appendChild(texts);
+    if (badge) head.appendChild(el('span', 'crp-card-badge', badge));
+    return head;
   }
 
   /* ---------- Cabeçalho ---------- */
   function initHeader() {
     var title = document.querySelector('.title');
-    var h1 = document.querySelector('h1.huge');
-    if (!title) return;
+    if (!title || title.getAttribute('data-crp-hero') === '1') return;
+    title.setAttribute('data-crp-hero', '1');
 
-    if (!title.querySelector('.crp-hero-icon')) {
-      var icon = el('span', 'crp-hero-icon');
-      icon.setAttribute('aria-hidden', 'true');
-      title.insertBefore(icon, title.firstChild);
-    }
-
-    if (h1 && !title.querySelector('.crp-req-badge')) {
+    var h1 = title.querySelector('h1.huge') || document.querySelector('h1.huge');
+    var badge = null;
+    if (h1) {
       var m = (h1.textContent || '').match(/#\s*(\d+)/);
       if (m) {
-        var badge = el('span', 'crp-req-badge', '#' + m[1]);
+        badge = el('span', 'crp-req-badge', '#' + m[1]);
         h1.setAttribute('data-original', h1.textContent);
         h1.textContent = (h1.textContent || '').replace(/#\s*\d+\s*/, '').trim();
-        h1.parentNode.insertBefore(badge, h1.nextSibling);
       }
     }
 
-    // Requester vai para o lado direito do cabeçalho
+    var heroIcon = icon('hero', 'crp-hero-icon');
     var req = document.getElementById('RequesterInfo');
-    if (req && !title.querySelector('#RequesterInfo')) {
-      var right = title.querySelector('.crp-hero-requester');
-      if (!right) { right = el('div', 'crp-hero-requester'); title.appendChild(right); }
-      right.appendChild(req);
+
+    // Coluna esquerda = bloco (span*) que contém o título
+    var left = null;
+    if (h1 && title.contains(h1)) {
+      left = h1.closest('[class*="span"]');
+      if (!left || !title.contains(left)) left = h1.parentNode !== title ? h1.parentNode : null;
     }
 
-    // Card "Resumo das informações principais"
-    var panelReq = document.getElementById('PanelRequester');
-    if (panelReq && !panelReq.querySelector('.crp-sec-titlebar')) {
-      var bar = el('div', 'crp-sec-titlebar');
-      bar.appendChild(el('span', 'crp-sec-eyebrow', 'RESUMO'));
-      bar.appendChild(el('h3', 'crp-sec-title', 'Informações principais'));
-      panelReq.insertBefore(bar, panelReq.firstChild);
+    if (left) {
+      var text = el('div', 'crp-hero-text');
+      while (left.firstChild) text.appendChild(left.firstChild);
+      left.classList.add('crp-hero-left');
+      left.appendChild(heroIcon);
+      left.appendChild(text);
+      if (badge) {
+        var heading = el('div', 'crp-hero-heading');
+        h1.parentNode.insertBefore(heading, h1);
+        heading.appendChild(h1);
+        heading.appendChild(badge);
+      }
+      if (req) {
+        var r = el('div', 'crp-hero-requester');
+        r.appendChild(req);
+        text.appendChild(r);
+      }
+      if (left.parentNode) {
+        left.parentNode.classList.add('crp-hero-row');
+        toArr(left.parentNode.children).forEach(function (c) {
+          if (c !== left) c.classList.add('crp-hero-side');
+        });
+      }
+    } else {
+      title.insertBefore(heroIcon, title.firstChild);
+      if (badge && h1) h1.parentNode.insertBefore(badge, h1.nextSibling);
+      if (req) {
+        var rr = el('div', 'crp-hero-requester');
+        rr.appendChild(req);
+        title.appendChild(rr);
+      }
     }
   }
 
-  /* ---------- Passo a passo: status ---------- */
-  function statusClass(txt) {
-    txt = String(txt || '').toLowerCase();
-    if (/conclu|cancel|fechad|finaliz|concluíd/.test(txt)) return 'crp-step-done';
-    if (/andamento|execu|atual|em curso|abert/.test(txt)) return 'crp-step-running';
-    if (/cancel|erro|reprov|falh/.test(txt)) return 'crp-step-error';
+  /* ---------- Resumo: "Rótulo: valor | Rótulo: valor" vira grade ---------- */
+  var SKIP_SUMMARY = '.title, #PanelStep, #PanelForm, #PanelMessage, #PanelFile, #boxSignature, #boxElectronicSignature, #crp-report-region, #RequesterInfo, .crp-card-head, .crp-summary-card';
+
+  function hideIfEmpty(node, stopAt) {
+    var guard = 0;
+    while (node && node !== document.body && guard++ < 4) {
+      if (node.querySelector(stopAt)) return;
+      var visible = toArr(node.childNodes).some(function (c) {
+        if (c.nodeType === 3) return !!c.textContent.trim();
+        if (c.nodeType !== 1) return false;
+        if (c.classList.contains('crp-src-hidden')) return false;
+        if (/^(BR|HR|SCRIPT|STYLE)$/.test(c.tagName)) return false;
+        return !!txt(c) || !!c.querySelector('img,table,input,select,iframe');
+      });
+      if (visible) return;
+      node.classList.add('crp-src-hidden');
+      node = node.parentElement;
+    }
+  }
+
+  function initSummary() {
+    if (document.querySelector('.crp-summary-card')) return;
+    var step = document.getElementById('PanelStep');
+    var panelReq = document.getElementById('PanelRequester');
+
+    var h4s = toArr(document.querySelectorAll('h4')).filter(function (h) {
+      return !h.closest(SKIP_SUMMARY) && /:/.test(h.textContent || '');
+    });
+
+    var pairs = [];
+    h4s.forEach(function (h) {
+      txt(h).split(/\n|\|/).forEach(function (part) {
+        var mm = part.trim().match(/^([^:]{1,60}):\s*(.*)$/);
+        if (mm) pairs.push({ label: mm[1].trim(), value: mm[2].trim() });
+      });
+    });
+
+    var card = panelReq || el('div');
+    card.classList.add('crp-card', 'crp-summary-card');
+    card.appendChild(cardHeader('RESUMO', 'Informações principais', null, 'info'));
+
+    if (pairs.length) {
+      var grid = el('div', 'crp-kv-grid');
+      pairs.forEach(function (p) {
+        var item = el('div', 'crp-kv');
+        item.appendChild(el('span', 'crp-kv-label', p.label));
+        var v = el('span', 'crp-kv-value' + (p.value ? '' : ' is-empty'), p.value || '—');
+        item.appendChild(v);
+        grid.appendChild(item);
+      });
+      card.appendChild(grid);
+      var parent = h4s[0].parentElement;
+      h4s.forEach(function (h) { h.classList.add('crp-src-hidden'); });
+      hideIfEmpty(parent, '#PanelStep, .title, #PanelForm, #PanelRequester');
+    } else if (h4s.length) {
+      var raw = el('div', 'crp-summary-raw');
+      h4s.forEach(function (h) { raw.appendChild(h); });
+      card.appendChild(raw);
+    }
+
+    if (!panelReq) {
+      if (!pairs.length && !h4s.length) return; // nada para mostrar
+      var anchor = step ? step.closest('.box.spaced') : null;
+      if (!anchor || anchor.contains(document.getElementById('PanelForm'))) anchor = step;
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(card, anchor);
+    }
+    // card vazio (sem dados) não aparece
+    if (!pairs.length && !h4s.length && !txt(card).replace(/RESUMO|Informações principais/g, '').trim()) {
+      card.classList.add('crp-src-hidden');
+    }
+  }
+
+  /* ---------- Passo a passo ---------- */
+  function statusClass(t) {
+    t = String(t || '').toLowerCase();
+    if (/cancel|erro|reprov|falh/.test(t)) return 'crp-step-error';
+    if (/conclu|fechad|finaliz/.test(t)) return 'crp-step-done';
+    if (/andamento|execu|atual|em curso|abert/.test(t)) return 'crp-step-running';
     return 'crp-step-pending';
   }
+
+  function isStepHead(tr) {
+    return !!tr.querySelector('[class^="table-step-col"], th');
+  }
+
+  function stepColumns(t) {
+    var cols = { task: 0, start: 1, end: 2, status: 4, resp: 5 };
+    var head = toArr(t.querySelectorAll('tr')).filter(isStepHead)[0];
+    if (!head) return cols;
+    toArr(head.children).forEach(function (c, i) {
+      var s = txt(c).toLowerCase();
+      if (/tarefa|atividade/.test(s)) cols.task = i;
+      else if (/in[ií]cio/.test(s)) cols.start = i;
+      else if (/conclus/.test(s)) cols.end = i;
+      else if (/status|situa/.test(s)) cols.status = i;
+      else if (/respons/.test(s)) cols.resp = i;
+    });
+    return cols;
+  }
+
   function setupSteps() {
     var t = document.getElementById('TableStep');
     if (!t) return;
-    Array.prototype.forEach.call(t.querySelectorAll('tbody > tr'), function (tr) {
-      if (tr.querySelector('[class^="table-step-col"]')) return; // linha de cabeçalho
+    if (!t.parentElement.classList.contains('crp-table-wrap')) {
+      var wrap = el('div', 'crp-table-wrap');
+      t.parentNode.insertBefore(wrap, t);
+      wrap.appendChild(t);
+    }
+    var cols = stepColumns(t);
+    toArr(t.querySelectorAll('tbody > tr, thead > tr')).forEach(function (tr) {
       if (tr.classList.contains('crp-step-flagged')) return;
       tr.classList.add('crp-step-flagged');
-      var cells = tr.children;
-      var statusCell = tr.querySelector('.table-step-col-5') || cells[4];
-      tr.classList.add(statusClass(statusCell ? statusCell.innerText : ''));
+      if (isStepHead(tr)) { tr.classList.add('crp-step-head'); return; }
+      if (!txt(tr)) { tr.classList.add('crp-row-empty'); return; }
+      var statusCell = tr.children[cols.status];
+      var cls = statusClass(txt(statusCell));
+      tr.classList.add(cls);
+      if (statusCell && txt(statusCell) && !statusCell.querySelector('.crp-status-pill')) {
+        var pill = el('span', 'crp-status-pill ' + cls);
+        while (statusCell.firstChild) pill.appendChild(statusCell.firstChild);
+        statusCell.appendChild(pill);
+      }
     });
   }
 
-  /* ---------- Accordions (seções do formulário) ---------- */
-  function setupAccordions() {
-    var form = document.getElementById('PanelForm');
-    if (!form) return;
-    Array.prototype.forEach.call(form.querySelectorAll('table.form'), function (tbl) {
-      var tbody = tbl.querySelector(':scope > tbody');
+  /* ---------- Formulário: accordions, campos vazios, títulos ---------- */
+  function isHiddenRow(tr) {
+    return tr.hidden || (tr.style && tr.style.display === 'none');
+  }
+
+  function setupForm(form) {
+    // Título "Formulário" repetido (o card já tem cabeçalho)
+    toArr(form.querySelectorAll('h1,h2,h3,h4,h5,legend,.box-header')).forEach(function (h) {
+      if (/^formul[aá]rio$/i.test(txt(h)) && !h.querySelector('table')) h.classList.add('crp-src-hidden');
+    });
+
+    toArr(form.querySelectorAll('table.form')).forEach(function (tbl) {
+      var tbody = tbl.tBodies[0];
       if (!tbody) return;
-      var groupRow = tbody.querySelector(':scope > tr.group');
-      if (!groupRow) return;
+      var rows = toArr(tbody.children);
+
+      rows.forEach(function (tr) {
+        if (tr.classList.contains('group')) return;
+        var tds = toArr(tr.children);
+        // linhas de texto/ajuda (célula única ou colspan) e campos largos em linha cheia
+        if (tds.length === 1 || tr.querySelector('td[colspan]') ||
+            tr.querySelector('table[mult="S"], .containerFormFileLink, [data-fieldformat="FILE"], textarea')) {
+          tr.classList.add('crp-full');
+        }
+        if (tds.length === 1) tr.classList.add('crp-note');
+        var val = tr.querySelector('td.col1');
+        if (val && !txt(val) && !val.querySelector('img,a,table,input:not([type="hidden"]),select,textarea,iframe')) {
+          val.classList.add('crp-val-empty');
+        }
+      });
+
+      var groupRow = rows.filter(function (tr) { return tr.classList.contains('group'); })[0];
+      if (!groupRow) { tbl.classList.add('crp-no-group'); return; }
       var td = groupRow.querySelector('td.group') || groupRow.firstElementChild;
       if (!td || td.getAttribute('data-crp-acc') === '1') return;
       td.setAttribute('data-crp-acc', '1');
 
-      var fields = Array.prototype.filter.call(tbody.querySelectorAll(':scope > tr'), function (tr) {
-        return !tr.classList.contains('group');
-      });
-      var count = fields.length;
+      var count = rows.filter(function (tr) {
+        return !tr.classList.contains('group') && !tr.classList.contains('crp-note') && !isHiddenRow(tr);
+      }).length;
 
-      var q = el('span', 'crp-sec-count', count + (count === 1 ? ' campo' : ' campos'));
+      var label = el('span', 'crp-sec-label');
+      while (td.firstChild) label.appendChild(td.firstChild);
+      td.appendChild(label);
+      td.appendChild(el('span', 'crp-sec-count', count + (count === 1 ? ' campo' : ' campos')));
       var arrow = el('span', 'crp-sec-arrow');
       arrow.setAttribute('aria-hidden', 'true');
-      td.appendChild(q);
       td.appendChild(arrow);
       td.setAttribute('role', 'button');
       td.tabIndex = 0;
@@ -141,52 +316,50 @@
   function setupMessages() {
     var t = document.getElementById('tblMessage');
     if (!t) return;
-    Array.prototype.forEach.call(t.querySelectorAll('tbody > tr'), function (tr) {
+    toArr(t.querySelectorAll('tbody > tr')).forEach(function (tr) {
       if (tr.querySelector('.alert')) return;
       var actor = tr.querySelector('td.actor');
       if (!actor || actor.querySelector('.crp-avatar')) return;
-      var name = (actor.innerText || '').trim();
-      var av = el('span', 'crp-avatar', initials(name));
-      actor.insertBefore(av, actor.firstChild);
+      actor.insertBefore(el('span', 'crp-avatar', initials(txt(actor))), actor.firstChild);
     });
   }
 
   /* ---------- Histórico (timeline a partir do passo a passo) ---------- */
   function buildHistorico() {
     var t = document.getElementById('TableStep');
-    if (!t) return null;
     var wrap = el('div', 'crp-timeline');
     var any = false;
-    Array.prototype.forEach.call(t.querySelectorAll('tbody > tr'), function (tr) {
-      if (tr.querySelector('[class^="table-step-col"]')) return;
-      var cells = tr.children;
-      if (!cells.length) return;
-      var nameEl = tr.querySelector('td:first-child strong') || cells[0];
-      var name = (nameEl ? nameEl.textContent : '').trim();
-      if (!name) return;
-      any = true;
-      var start = cells[1] ? cells[1].innerText.trim() : '';
-      var end = cells[2] ? cells[2].innerText.trim() : '';
-      var status = cells[4] ? cells[4].innerText.trim() : '';
-      var resp = cells[5] ? cells[5].innerText.trim() : '';
+    if (t) {
+      var cols = stepColumns(t);
+      toArr(t.querySelectorAll('tbody > tr')).forEach(function (tr) {
+        if (isStepHead(tr) || tr.classList.contains('crp-row-empty')) return;
+        var cells = tr.children;
+        if (!cells.length) return;
+        var nameCell = cells[cols.task];
+        var nameEl = nameCell && (nameCell.querySelector('strong') || nameCell);
+        var name = txt(nameEl);
+        if (!name) return;
+        any = true;
+        var clean = function (i) { return txt(cells[i]).replace(/\s*\n+\s*/g, ' · '); };
+        var start = clean(cols.start), end = clean(cols.end), status = clean(cols.status), resp = clean(cols.resp);
 
-      var item = el('div', 'crp-tl-item ' + statusClass(status));
-      item.appendChild(el('span', 'crp-tl-dot'));
-      var card = el('div', 'crp-tl-card');
-      card.appendChild(el('div', 'crp-tl-task', name));
-      var meta = [];
-      if (start) meta.push('Início: ' + start);
-      if (end) meta.push('Conclusão: ' + end);
-      if (status) meta.push(status);
-      if (meta.length) card.appendChild(el('div', 'crp-tl-meta', meta.join(' · ')));
-      if (resp) card.appendChild(el('div', 'crp-tl-resp', resp));
-      item.appendChild(card);
-      wrap.appendChild(item);
-    });
-    if (!any) {
-      var empty = el('div', 'alert', 'Sem eventos no histórico.');
-      wrap.appendChild(empty);
+        var item = el('div', 'crp-tl-item ' + statusClass(status));
+        item.appendChild(el('span', 'crp-tl-dot'));
+        var card = el('div', 'crp-tl-card');
+        var top = el('div', 'crp-tl-top');
+        top.appendChild(el('div', 'crp-tl-task', name));
+        if (status) top.appendChild(el('span', 'crp-status-pill ' + statusClass(status), status));
+        card.appendChild(top);
+        var meta = [];
+        if (start) meta.push('Início: ' + start);
+        if (end) meta.push('Conclusão: ' + end);
+        if (meta.length) card.appendChild(el('div', 'crp-tl-meta', meta.join('   •   ')));
+        if (resp) card.appendChild(el('div', 'crp-tl-resp', resp));
+        item.appendChild(card);
+        wrap.appendChild(item);
+      });
     }
+    if (!any) wrap.appendChild(el('div', 'alert', 'Sem eventos no histórico.'));
     return wrap;
   }
 
@@ -201,6 +374,7 @@
     if (step.parentElement) step.parentElement.classList.add('crp-report-main');
 
     initHeader();
+    initSummary();
     setupSteps();
 
     var msg = document.getElementById('PanelMessage');
@@ -216,10 +390,10 @@
     var panelsWrap = el('div', 'crp-tabpanels');
 
     var defs = [
-      { key: 'geral', label: 'Geral', icon: 'geral', count: null },
-      { key: 'mensagens', label: 'Mensagens', icon: 'mensagens', count: msgCount },
-      { key: 'anexos', label: 'Anexos', icon: 'anexos', count: fileCount },
-      { key: 'historico', label: 'Histórico', icon: 'historico', count: null }
+      { key: 'geral', label: 'Geral', count: null },
+      { key: 'mensagens', label: 'Mensagens', count: msgCount },
+      { key: 'anexos', label: 'Anexos', count: fileCount },
+      { key: 'historico', label: 'Histórico', count: null }
     ];
     var tabs = {}, panels = {};
 
@@ -230,8 +404,7 @@
       btn.setAttribute('role', 'tab');
       btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
       btn.setAttribute('data-tab', d.key);
-      var ic = el('span', 'crp-tab-ic'); ic.innerHTML = ICONS[d.icon];
-      btn.appendChild(ic);
+      btn.appendChild(icon(d.key, 'crp-tab-ic'));
       btn.appendChild(el('span', 'crp-tab-text', d.label));
       if (d.count !== null) btn.appendChild(el('span', 'crp-tab-count', String(d.count)));
       btn.addEventListener('click', function () { select(d.key); });
@@ -260,47 +433,44 @@
 
     region.appendChild(nav);
     region.appendChild(panelsWrap);
-    step.parentNode.insertBefore(region, step.nextSibling);
+    var stepBox = step.closest('.box.spaced');
+    if (!stepBox || stepBox.contains(form)) stepBox = step;
+    stepBox.parentNode.insertBefore(region, stepBox.nextSibling);
 
-    // Move painéis existentes (mantém IDs/eventos), com cabeçalho de card.
-    var geralPanel = panels.geral;
-    geralPanel.appendChild(cardHeader('RESUMO', 'Dados da solicitação'));
-    geralPanel.appendChild(form);
+    function card(panel, head) {
+      var c = el('div', 'crp-card crp-tab-card');
+      c.appendChild(head);
+      panel.appendChild(c);
+      return c;
+    }
+
+    // Geral: formulário dentro de um card
+    var geral = card(panels.geral, cardHeader('RESUMO', 'Dados da solicitação', null, 'geral'));
+    geral.appendChild(form);
     ['boxSignature', 'boxElectronicSignature'].forEach(function (id) {
       var b = document.getElementById(id);
-      if (b && b.parentNode) geralPanel.appendChild(b);
+      if (b && b.parentNode) { b.classList.add('crp-card'); panels.geral.appendChild(b); }
     });
 
-    if (msg) {
-      panels.mensagens.appendChild(cardHeader('MENSAGENS', 'Conversa da solicitação', msgCount + (msgCount === 1 ? ' mensagem' : ' mensagens')));
-      panels.mensagens.appendChild(msg);
-    }
-    if (file) {
-      panels.anexos.appendChild(cardHeader('ANEXOS', 'Arquivos da solicitação', fileCount + (fileCount === 1 ? ' arquivo' : ' arquivos')));
-      panels.anexos.appendChild(file);
-    }
-    var tl = buildHistorico();
-    panels.historico.appendChild(cardHeader('HISTÓRICO', 'Linha do tempo da solicitação'));
-    if (tl) panels.historico.appendChild(tl);
+    var mc = card(panels.mensagens, cardHeader('MENSAGENS', 'Conversa da solicitação',
+      msgCount + (msgCount === 1 ? ' mensagem' : ' mensagens'), 'mensagens'));
+    if (msg) mc.appendChild(msg);
+    else mc.appendChild(el('div', 'alert', 'Nenhuma mensagem.'));
+
+    var fc = card(panels.anexos, cardHeader('ANEXOS', 'Arquivos da solicitação',
+      fileCount + (fileCount === 1 ? ' arquivo' : ' arquivos'), 'anexos'));
+    if (file) fc.appendChild(file);
+    else fc.appendChild(el('div', 'alert', 'Nenhum arquivo.'));
+
+    var hc = card(panels.historico, cardHeader('HISTÓRICO', 'Linha do tempo da solicitação', null, 'historico'));
+    hc.appendChild(buildHistorico());
 
     if (msgCount === 0) panels.mensagens.classList.add('crp-tabpanel-empty');
     if (fileCount === 0) panels.anexos.classList.add('crp-tabpanel-empty');
 
-    setupAccordions();
+    setupForm(form);
     setupMessages();
     return true;
-  }
-
-  function cardHeader(eyebrow, title, badge) {
-    var head = el('div', 'crp-card-head');
-    var ic = el('span', 'crp-card-ic'); ic.setAttribute('aria-hidden', 'true');
-    head.appendChild(ic);
-    var texts = el('div', 'crp-card-head-text');
-    texts.appendChild(el('span', 'crp-card-eyebrow', eyebrow));
-    texts.appendChild(el('h3', 'crp-card-heading', title));
-    head.appendChild(texts);
-    if (badge) head.appendChild(el('span', 'crp-card-badge', badge));
-    return head;
   }
 
   function start() {
