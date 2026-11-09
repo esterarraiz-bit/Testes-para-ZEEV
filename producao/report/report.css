@@ -1,0 +1,103 @@
+/* CRP | Relatório de Detalhamento das solicitações (audit-legacy)
+   Cores da CRP: azul #2A4B8D, vermelho #E6373B, laranja #F6A730.
+   Carregado via "Scripts e estilos nos relatórios" (recursos externos). */
+
+body.pop.bg-body{
+  background:#F5F7FC !important;
+  color:#22304F !important;
+  font-family:Roboto,"Segoe UI",Arial,sans-serif !important;
+}
+body.pop h1, body.pop h2, body.pop h3, body.pop h4, body.pop h5{
+  color:#2A4B8D !important;
+  font-weight:700 !important;
+}
+body.pop h1.huge{ font-size:26px !important; letter-spacing:-.01em; }
+body.pop a{ color:#2A4B8D !important; }
+
+/* Nome do aplicativo / selo */
+body.pop .title{ color:#2A4B8D !important; font-weight:700 !important; }
+body.pop .title .label,
+body.pop .label{
+  background:#2A4B8D !important;
+  color:#FFFFFF !important;
+  border-radius:8px !important;
+  font-weight:600 !important;
+  padding:4px 10px !important;
+}
+
+/* Cards/painéis (RequesterInfo, Passo a passo, Formulário, Mensagens, Anexos) */
+body.pop .box.spaced{
+  background:#FFFFFF !important;
+  border:1px solid #E3E8F3 !important;
+  border-radius:14px !important;
+  box-shadow:0 4px 18px rgba(42,75,141,.06) !important;
+  padding:20px 22px !important;
+  margin-bottom:16px !important;
+}
+body.pop .box.spaced h2{ margin-top:0 !important; }
+body.pop .box.spaced h4{
+  color:#4A5A80 !important;
+  font-weight:500 !important;
+  font-size:13px !important;
+  line-height:1.6 !important;
+}
+
+/* Tabelas (passo a passo e formulário) */
+body.pop table.table{ border-color:#E3E8F3 !important; }
+body.pop table.table > tbody > tr > td{
+  border-color:#EEF1F7 !important;
+  color:#22304F !important;
+  padding:10px 12px !important;
+}
+body.pop table.table-striped > tbody > tr:nth-child(odd) > td{
+  background:#FAFBFE !important;
+}
+/* Cabeçalho da tabela de passos (células com table-step-col-N) */
+body.pop td[class^="table-step-col"]{
+  background:#F5F7FC !important;
+  color:#5B6B8C !important;
+  text-transform:uppercase !important;
+  font-size:11px !important;
+  font-weight:600 !important;
+  letter-spacing:.04em !important;
+  border-bottom:1px solid #E3E8F3 !important;
+}
+/* Formulário: rótulo (col0) e valor (col1) */
+body.pop table.form > tbody > tr > td.col0{
+  color:#5B6B8C !important;
+  font-size:12px !important;
+  font-weight:500 !important;
+}
+body.pop table.form > tbody > tr > td.col1{
+  color:#22304F !important;
+  font-size:14px !important;
+}
+body.pop table.form > tbody > tr.group > td.group{
+  color:#2A4B8D !important;
+  font-weight:700 !important;
+  font-size:15px !important;
+}
+
+/* Botões e ações (Ações / Copiar Link / Imprimir / Visualizar todos) */
+body.pop .btn, body.pop a.btn{
+  border-radius:10px !important;
+  font-weight:600 !important;
+  box-shadow:none !important;
+}
+body.pop .btn-small{
+  background:#FFFFFF !important;
+  border:1px solid #C7D4EA !important;
+  color:#2A4B8D !important;
+  padding:6px 12px !important;
+}
+body.pop .btn-small:hover{
+  background:#E4ECFB !important;
+  border-color:#2A4B8D !important;
+}
+body.pop .dropdown-toggle{ color:#2A4B8D !important; font-weight:600 !important; }
+body.pop .pull-right.padded{ color:#2A4B8D !important; font-weight:600 !important; }
+body.pop .box.spaced .large{ color:#2A4B8D !important; }
+
+/* Destaques de estado */
+body.pop .text-danger, body.pop .danger{ color:#E6373B !important; }
+body.pop .text-success, body.pop .success{ color:#2E7D32 !important; }
