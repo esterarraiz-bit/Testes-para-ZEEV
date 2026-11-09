@@ -1,153 +1,413 @@
-/* CRP | Relatório de Detalhamento das solicitações (audit-legacy)
-   Cores da CRP: azul #2A4B8D, vermelho #E6373B, laranja #F6A730.
-   Carregado via "Scripts e estilos nos relatórios" (recursos externos). */
+/* =========================================================================
+   CRP | Relatório de Detalhamento das solicitações (audit-legacy)
+   Redesign por abas. Identidade visual CRP Tecnologia.
+   Carregado via "Scripts e estilos nos relatórios" (recursos externos).
+   Escopo: body.pop (página do relatório), sem afetar o restante do Zeev.
+   ========================================================================= */
 
-body.pop.bg-body{
-  background:#F5F7FC !important;
-  color:#22304F !important;
+body.pop{
+  --crp-blue:#053F88;
+  --crp-blue-dark:#03336F;
+  --crp-blue-2:#2A4B8D;
+  --crp-blue-soft:#6B83B5;
+  --crp-bg:#F3F6FB;
+  --crp-read:#EAF0F8;
+  --crp-border:#C7D4EA;
+  --crp-warn:#F6A730;
+  --crp-error:#E6373B;
+  --crp-text:#20344E;
+  --crp-muted:#5B6B8C;
+  --crp-white:#FFFFFF;
+  --crp-radius:14px;
+  --crp-radius-sm:10px;
+  --crp-shadow:0 1px 2px rgba(5,63,136,.06), 0 6px 18px rgba(5,63,136,.05);
+
+  background:var(--crp-bg) !important;
+  color:var(--crp-text) !important;
   font-family:Roboto,"Segoe UI",Arial,sans-serif !important;
 }
+
+/* ---------- Base ---------- */
+body.pop a{ color:var(--crp-blue) !important; }
 body.pop h1, body.pop h2, body.pop h3, body.pop h4, body.pop h5{
-  color:#2A4B8D !important;
+  color:var(--crp-blue) !important;
   font-weight:700 !important;
 }
-body.pop h1.huge{ font-size:26px !important; letter-spacing:-.01em; }
-body.pop a{ color:#2A4B8D !important; }
+body.pop .muted, body.pop .text-muted, body.pop small{ color:var(--crp-muted) !important; }
 
-/* Nome do aplicativo / selo */
-body.pop .title{ color:#2A4B8D !important; font-weight:700 !important; }
-body.pop .title .label,
-body.pop .label{
-  background:#2A4B8D !important;
-  color:#FFFFFF !important;
-  border-radius:8px !important;
-  font-weight:600 !important;
-  padding:4px 10px !important;
+/* ---------- Cabeçalho (.title) ---------- */
+body.pop .title{
+  box-sizing:border-box;
+  width:auto;
+  margin:16px 16px 12px !important;
+  padding:18px 22px !important;
+  background:var(--crp-white) !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius) !important;
+  box-shadow:var(--crp-shadow) !important;
 }
-
-/* Cards/painéis (RequesterInfo, Passo a passo, Formulário, Mensagens, Anexos) */
-body.pop .box.spaced{
-  background:#FFFFFF !important;
-  border:1px solid #E3E8F3 !important;
-  border-radius:14px !important;
-  box-shadow:0 4px 18px rgba(42,75,141,.06) !important;
-  padding:20px 22px !important;
-  margin-bottom:16px !important;
+body.pop .title .row-fluid{
+  display:flex !important;
+  align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
 }
-body.pop .box.spaced h2{ margin-top:0 !important; }
-body.pop .box.spaced h4{
-  color:#4A5A80 !important;
-  font-weight:500 !important;
-  font-size:13px !important;
-  line-height:1.6 !important;
-}
-
-/* Tabelas (passo a passo e formulário) */
-body.pop table.table{ border-color:#E3E8F3 !important; }
-body.pop table.table > tbody > tr > td{
-  border-color:#EEF1F7 !important;
-  color:#22304F !important;
-  padding:10px 12px !important;
-}
-body.pop table.table-striped > tbody > tr:nth-child(odd) > td{
-  background:#FAFBFE !important;
-}
-/* Cabeçalho da tabela de passos (células com table-step-col-N) */
-body.pop td[class^="table-step-col"]{
-  background:#F5F7FC !important;
-  color:#5B6B8C !important;
-  text-transform:uppercase !important;
-  font-size:11px !important;
-  font-weight:600 !important;
-  letter-spacing:.04em !important;
-  border-bottom:1px solid #E3E8F3 !important;
-}
-/* Formulário: rótulo (col0) e valor (col1) */
-body.pop table.form > tbody > tr > td.col0{
-  color:#5B6B8C !important;
+body.pop .title [class*="span"]{ float:none !important; }
+body.pop .title .span6{ flex:1 1 420px; min-width:0; }
+body.pop .title .label{
+  background:transparent !important;
+  color:var(--crp-blue-soft) !important;
   font-size:12px !important;
-  font-weight:500 !important;
+  font-weight:600 !important;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  padding:0 !important;
+  border-radius:0 !important;
 }
-body.pop table.form > tbody > tr > td.col1{
-  color:#22304F !important;
-  font-size:14px !important;
+body.pop h1.huge{
+  font-size:26px !important;
+  line-height:1.2 !important;
+  color:var(--crp-blue) !important;
+  margin:6px 0 0 !important;
+  letter-spacing:-.01em;
 }
-body.pop table.form > tbody > tr.group > td.group{
-  color:#2A4B8D !important;
-  font-weight:700 !important;
-  font-size:15px !important;
+/* Ações (Ações / Copiar Link / Imprimir) */
+body.pop .title ul.nav, body.pop .title .nav{
+  display:flex !important; gap:8px; align-items:center;
+  margin:0 !important; padding:0 !important; list-style:none;
+}
+body.pop .title .dropdown-toggle,
+body.pop .dropdown-toggle{
+  display:inline-flex !important; align-items:center; gap:6px;
+  padding:8px 12px !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius-sm) !important;
+  background:var(--crp-white) !important;
+  color:var(--crp-blue) !important;
+  font-weight:600 !important;
+  font-size:13px !important;
+  text-decoration:none !important;
+}
+body.pop .title .dropdown-toggle:hover,
+body.pop .dropdown-toggle:hover{ background:var(--crp-read) !important; }
+/* QR Code */
+body.pop .title img[src^="data:"]{
+  width:92px !important; height:92px !important;
+  padding:6px; box-sizing:border-box;
+  background:var(--crp-white);
+  border:1px solid var(--crp-border);
+  border-radius:var(--crp-radius-sm);
 }
 
-/* Botões e ações (Ações / Copiar Link / Imprimir / Visualizar todos) */
-body.pop .btn, body.pop a.btn{
-  border-radius:10px !important;
+/* ---------- Card do solicitante + meta ---------- */
+body.pop #PanelRequester{
+  margin:0 16px 12px !important;
+  padding:16px 22px !important;
+  background:var(--crp-white) !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius) !important;
+  box-shadow:var(--crp-shadow) !important;
+}
+body.pop #PanelRequester h4{
+  margin:0 0 14px !important;
+  color:var(--crp-text) !important;
+  font-size:13px !important;
+  line-height:1.9 !important;
+  font-weight:400 !important;
+}
+body.pop #PanelRequester h4 strong{
+  color:var(--crp-blue-soft) !important;
   font-weight:600 !important;
+  text-transform:uppercase;
+  font-size:11px;
+  letter-spacing:.03em;
+}
+body.pop #RequesterInfo{
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px !important;
+  margin:0 !important;
+  background:var(--crp-read) !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius-sm) !important;
   box-shadow:none !important;
 }
-body.pop .btn-small{
-  background:#FFFFFF !important;
-  border:1px solid #C7D4EA !important;
-  color:#2A4B8D !important;
-  padding:6px 12px !important;
+body.pop #RequesterInfo .box-header{ display:none !important; }
+body.pop #RequesterInfo .box-body{ padding:0 !important; }
+body.pop #RequesterInfo .user{ display:flex; align-items:center; gap:12px; }
+body.pop #RequesterInfo .user-photo{
+  width:40px; height:40px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--crp-blue) !important; color:#fff !important;
 }
-body.pop .btn-small:hover{
-  background:#E4ECFB !important;
-  border-color:#2A4B8D !important;
+body.pop #RequesterInfo strong{ color:var(--crp-text) !important; font-weight:600; }
+body.pop #RequesterInfo .small{ color:var(--crp-muted) !important; }
+
+/* ---------- Área principal ---------- */
+body.pop .crp-report-main{ max-width:none; }
+
+/* ---------- Cards genéricos (Passo a passo, etc.) ---------- */
+body.pop .box.spaced{
+  margin:0 16px 16px !important;
+  padding:20px 22px !important;
+  background:var(--crp-white) !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius) !important;
+  box-shadow:var(--crp-shadow) !important;
 }
-body.pop .dropdown-toggle{ color:#2A4B8D !important; font-weight:600 !important; }
-body.pop .pull-right.padded{ color:#2A4B8D !important; font-weight:600 !important; }
-body.pop .box.spaced .large{ color:#2A4B8D !important; }
+body.pop .box.spaced > h2{
+  margin:0 0 16px !important;
+  font-size:16px !important;
+  color:var(--crp-blue) !important;
+}
 
-/* Destaques de estado */
-body.pop .text-danger, body.pop .danger{ color:#E6373B !important; }
-body.pop .text-success, body.pop .success{ color:#2E7D32 !important; }
+/* ---------- Passo a passo ---------- */
+body.pop #TableStep{
+  width:100% !important;
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  font-size:13px !important;
+}
+body.pop #TableStep > tbody > tr > td{
+  padding:11px 14px !important;
+  border-bottom:1px solid var(--crp-read) !important;
+  vertical-align:middle !important;
+  color:var(--crp-text) !important;
+}
+body.pop #TableStep > tbody > tr:first-child > td{
+  background:var(--crp-read) !important;
+  color:var(--crp-muted) !important;
+  text-transform:uppercase;
+  font-size:11px !important;
+  font-weight:600 !important;
+  letter-spacing:.04em;
+  border-bottom:1px solid var(--crp-border) !important;
+}
+body.pop #TableStep > tbody > tr:hover > td{ background:#F7FAFF !important; }
+body.pop #TableStep > tbody > tr > td:first-child{ font-weight:600; }
+body.pop #TableStep strong{ color:var(--crp-text) !important; }
+body.pop #TableStep .table-step-col-5{ white-space:nowrap; }
+body.pop #TableStep .task-desc, body.pop #TableStep .small{ color:var(--crp-muted) !important; }
 
-/* ===== Formulário em grade: reduz a rolagem vertical ===== */
-body.pop #PanelForm table.form{ display:block !important; width:100% !important; }
+/* ---------- Abas ---------- */
+body.pop .crp-report-region{ margin:0 16px 24px; }
+body.pop .crp-report-tabs{
+  display:flex; flex-wrap:wrap; gap:4px;
+  margin:0 0 16px;
+  padding:4px;
+  background:var(--crp-white);
+  border:1px solid var(--crp-border);
+  border-radius:var(--crp-radius);
+  box-shadow:var(--crp-shadow);
+}
+body.pop .crp-report-tab{
+  appearance:none;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 16px;
+  border:0; border-radius:var(--crp-radius-sm);
+  background:transparent;
+  color:var(--crp-muted);
+  font-family:inherit; font-size:14px; font-weight:600;
+  cursor:pointer;
+  transition:background-color .15s, color .15s;
+}
+body.pop .crp-report-tab:hover{ background:var(--crp-read); color:var(--crp-blue); }
+body.pop .crp-report-tab[aria-selected="true"]{
+  background:var(--crp-blue) !important;
+  color:#fff !important;
+}
+body.pop .crp-tab-count{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:20px; height:20px; padding:0 6px;
+  border-radius:999px;
+  background:var(--crp-read);
+  color:var(--crp-blue);
+  font-size:11px; font-weight:700;
+}
+body.pop .crp-report-tab[aria-selected="true"] .crp-tab-count{
+  background:rgba(255,255,255,.22); color:#fff;
+}
+body.pop .crp-tabpanel[data-hidden="1"]{ display:none !important; }
+
+/* ---------- Formulário (Resumo) ---------- */
+body.pop #PanelForm{ padding:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; margin:0 !important; }
+body.pop #PanelForm > h2{ display:none !important; } /* rótulo vem da aba */
+
+/* Cada grupo (table.form) = uma seção */
+body.pop #PanelForm table.form{
+  display:block !important; width:100% !important;
+  margin:0 0 18px !important; padding:0 0 14px !important;
+  border:0 !important; border-bottom:1px solid var(--crp-read) !important;
+}
+body.pop #PanelForm table.form:last-child{ border-bottom:0 !important; }
 body.pop #PanelForm table.form > tbody{
   display:grid !important;
   grid-template-columns:repeat(4, minmax(0,1fr)) !important;
   gap:14px 24px !important;
   align-items:start !important;
-  padding:6px 0 0 !important;
+  padding:4px 0 0 !important;
 }
-/* Cada linha vira um "campo" (rótulo em cima, valor embaixo) */
 body.pop #PanelForm table.form > tbody > tr{ display:block !important; min-width:0; }
-/* Cabeçalho do grupo ocupa a linha inteira */
 body.pop #PanelForm table.form > tbody > tr.group{
   grid-column:1 / -1 !important;
   margin:0 0 4px !important;
-  padding:0 0 6px !important;
-  border-bottom:1px solid #E3E8F3 !important;
+  padding:0 0 8px !important;
+  border-bottom:1px solid var(--crp-border) !important;
+}
+body.pop #PanelForm table.form > tbody > tr.group > td,
+body.pop #PanelForm table.form > tbody > tr.group b{
+  color:var(--crp-blue) !important;
+  font-size:14px !important;
+  font-weight:700 !important;
 }
 body.pop #PanelForm table.form > tbody > tr > td{
-  display:block !important;
-  padding:0 !important;
-  border:0 !important;
+  display:block !important; padding:0 !important; border:0 !important;
 }
 body.pop #PanelForm table.form > tbody > tr > td.col0{
   font-size:11px !important;
-  color:#5B6B8C !important;
-  text-transform:uppercase !important;
-  letter-spacing:.03em !important;
+  color:var(--crp-muted) !important;
+  text-transform:uppercase;
+  letter-spacing:.03em;
   font-weight:600 !important;
-  margin-bottom:2px !important;
+  margin-bottom:3px !important;
 }
 body.pop #PanelForm table.form > tbody > tr > td.col1{
   font-size:14px !important;
-  color:#22304F !important;
+  color:var(--crp-text) !important;
   overflow-wrap:anywhere !important;
 }
-/* Multivaloradas, anexos e textarea ocupam a linha inteira */
+/* Campos longos / multivaloradas / anexos ocupam a linha inteira */
 body.pop #PanelForm table.form > tbody > tr:has(table[mult="S"]),
 body.pop #PanelForm table.form > tbody > tr:has(.containerFormFileLink),
 body.pop #PanelForm table.form > tbody > tr:has([data-fieldformat="FILE"]),
-body.pop #PanelForm table.form > tbody > tr:has(textarea){
-  grid-column:1 / -1 !important;
+body.pop #PanelForm table.form > tbody > tr:has(textarea){ grid-column:1 / -1 !important; }
+/* Tabela multivalorada: rolagem horizontal quando necessário */
+body.pop #PanelForm table.form > tbody > tr:has(table[mult="S"]) > td{ overflow-x:auto; }
+body.pop #PanelForm table[mult="S"]{
+  width:100% !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius-sm) !important;
+  border-collapse:separate !important; border-spacing:0 !important;
+  font-size:13px !important;
 }
+body.pop #PanelForm table[mult="S"] thead td,
+body.pop #PanelForm table[mult="S"] td.header{
+  background:var(--crp-read) !important; color:var(--crp-muted) !important;
+  font-size:11px !important; font-weight:600 !important; text-transform:uppercase;
+}
+body.pop #PanelForm table[mult="S"] td{ border-color:var(--crp-read) !important; padding:8px 10px !important; }
+
+/* Assinaturas no resumo */
+body.pop #boxSignature, body.pop #boxElectronicSignature{
+  margin:0 0 16px !important; padding:16px 18px !important;
+  background:var(--crp-white) !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius) !important;
+  box-shadow:var(--crp-shadow) !important;
+}
+
+/* ---------- Mensagens ---------- */
+body.pop #PanelMessage{ padding:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; margin:0 !important; }
+body.pop #PanelMessage > h2, body.pop #ContainerMessages > h2{ display:none !important; }
+body.pop #ContainerMessages{ padding:0 !important; margin:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; }
+body.pop #tblMessage{
+  width:100% !important;
+  border-collapse:separate !important; border-spacing:0 10px !important;
+  font-size:14px !important;
+}
+body.pop #tblMessage thead{ display:none !important; } /* vira histórico, sem cabeçalho de tabela */
+body.pop #tblMessage tbody > tr{
+  display:block;
+  background:var(--crp-white) !important;
+  border:1px solid var(--crp-border) !important;
+  border-left:3px solid var(--crp-blue) !important;
+  border-radius:var(--crp-radius-sm) !important;
+  padding:12px 16px !important;
+}
+body.pop #tblMessage tbody > tr > td{
+  display:inline-block; vertical-align:top;
+  padding:0 10px 0 0 !important; border:0 !important;
+}
+body.pop #tblMessage td.actor{ display:block; color:var(--crp-blue) !important; font-weight:600; font-size:13px; }
+body.pop #tblMessage td.date{ display:block; color:var(--crp-muted) !important; font-size:12px; }
+body.pop #tblMessage td.message{ display:block; width:100% !important; margin-top:8px; color:var(--crp-text); line-height:1.6; }
+body.pop #tblMessage td.task, body.pop #tblMessage td.process{ color:var(--crp-blue-soft) !important; font-size:12px; }
+body.pop #tblMessage td.lock, body.pop #tblMessage td.del{ display:none !important; }
+
+/* ---------- Anexos ---------- */
+body.pop #PanelFile{ padding:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; margin:0 !important; }
+body.pop #PanelFile > h2, body.pop #ContainerAttach > h2{ display:none !important; }
+body.pop #ContainerAttach{ padding:0 !important; margin:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; }
+body.pop #tblFile{
+  width:100% !important;
+  border-collapse:separate !important; border-spacing:0 10px !important;
+  font-size:14px !important;
+}
+body.pop #tblFile thead{ display:none !important; }
+body.pop #tblFile tbody > tr{
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px;
+  background:var(--crp-white) !important;
+  border:1px solid var(--crp-border) !important;
+  border-radius:var(--crp-radius-sm) !important;
+  padding:12px 14px !important;
+}
+body.pop #tblFile tbody > tr > td{
+  border:0 !important; padding:0 !important; background:transparent !important;
+}
+body.pop #tblFile td.fileicon{ flex:0 0 auto; }
+body.pop #tblFile td.filename:nth-child(3){ flex:1 1 240px; min-width:0; }
+body.pop #tblFile td.filename:nth-child(3) a{
+  color:var(--crp-text) !important; font-weight:600 !important; text-decoration:none !important;
+  overflow-wrap:anywhere;
+}
+body.pop #tblFile td.filedonwload, body.pop #tblFile td.download{ flex:0 0 auto; margin-left:auto; }
+body.pop #tblFile td.filedonwload a, body.pop #tblFile td.download a{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:8px;
+  border:1px solid var(--crp-border) !important;
+  background:var(--crp-white) !important; color:var(--crp-blue) !important;
+}
+body.pop #tblFile td.filedonwload a:hover, body.pop #tblFile td.download a:hover{ background:var(--crp-read) !important; }
+body.pop #tblFile td.date, body.pop #tblFile td.actor, body.pop #tblFile td.task, body.pop #tblFile td.process{
+  color:var(--crp-muted) !important; font-size:12px; flex:0 0 auto;
+}
+body.pop #tblFile td.lock, body.pop #tblFile td.del{ display:none !important; }
+
+/* Estados vazios (alertas nativos) */
+body.pop .alert{
+  border:1px dashed var(--crp-border) !important;
+  background:var(--crp-read) !important;
+  color:var(--crp-muted) !important;
+  border-radius:var(--crp-radius-sm) !important;
+  padding:20px !important;
+  text-align:center !important;
+}
+
+/* ---------- Responsivo ---------- */
 @media (max-width:1200px){
   body.pop #PanelForm table.form > tbody{ grid-template-columns:repeat(2, minmax(0,1fr)) !important; }
 }
+@media (max-width:900px){
+  body.pop .title .row-fluid{ flex-direction:column; align-items:flex-start; }
+  body.pop .title img[src^="data:"]{ width:84px; height:84px; }
+  body.pop #RequesterInfo{ flex-direction:column; align-items:flex-start; }
+}
 @media (max-width:700px){
+  body.pop .title, body.pop #PanelRequester, body.pop .box.spaced,
+  body.pop .crp-report-region{ margin-left:8px !important; margin-right:8px !important; }
   body.pop #PanelForm table.form > tbody{ grid-template-columns:minmax(0,1fr) !important; }
+  body.pop .crp-report-tabs{ overflow-x:auto; flex-wrap:nowrap; }
+  body.pop .crp-report-tab{ white-space:nowrap; }
+  body.pop #tblMessage tbody > tr, body.pop #tblFile tbody > tr{ padding:10px 12px !important; }
+}
+
+/* ---------- Impressão: mostra as três abas ---------- */
+@media print{
+  body.pop{ background:#fff !important; }
+  body.pop .crp-report-tabs{ display:none !important; }
+  body.pop .crp-tabpanel,
+  body.pop .crp-tabpanel[data-hidden="1"]{ display:block !important; }
+  body.pop .crp-tabpanel{ break-inside:avoid; }
+  body.pop .box.spaced, body.pop .title, body.pop #PanelRequester{
+    box-shadow:none !important;
+  }
 }
