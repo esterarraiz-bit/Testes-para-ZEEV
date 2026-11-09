@@ -447,8 +447,8 @@
     var menu = dd && dd.querySelector('.dropdown-menu');
     if (!menu) return;
 
-    var order = ['LkEdit', 'LkHoldShowOn', 'LkDelete', 'LkCancel'];
-    var keyOf = { LkEdit: 'edit', LkHoldShowOn: 'hold', LkDelete: 'delete', LkCancel: 'cancel' };
+    var order = ['LkCancel', 'LkHoldShowOn', 'LkEdit'];
+    var keyOf = { LkEdit: 'edit', LkHoldShowOn: 'hold', LkCancel: 'cancel' };
     var items = {};
     Array.prototype.forEach.call(menu.children, function (li) {
       var a = li.querySelector('a');
@@ -456,6 +456,8 @@
       li.classList.add('crp-ab-' + keyOf[a.id]);
       items[a.id] = li;
     });
+    var del = menu.querySelector('#LkDelete');
+    if (del && del.parentNode) del.parentNode.removeChild(del); // Excluir: nunca exibir
 
     var list = el('ul', 'crp-bottom-bar-actions');
     order.forEach(function (id) {
