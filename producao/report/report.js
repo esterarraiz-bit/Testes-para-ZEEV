@@ -438,6 +438,21 @@
     return wrap;
   }
 
+  /* ---------- Barra inferior de ações ---------- */
+  function buildBottomBar() {
+    var nav = document.querySelector('.title ul.nav');
+    if (!nav || document.getElementById('crp-bottom-bar')) return;
+    var bar = el('div', 'crp-bottom-bar');
+    bar.id = 'crp-bottom-bar';
+    bar.setAttribute('role', 'toolbar');
+    bar.setAttribute('aria-label', 'Ações da solicitação');
+    var inner = el('div', 'crp-bottom-bar-inner');
+    inner.appendChild(nav); // move o próprio ul.nav (mantém handlers/dropdown)
+    bar.appendChild(inner);
+    document.body.appendChild(bar);
+    document.body.classList.add('crp-has-bottom-bar');
+  }
+
   /* ---------- Abas ---------- */
   function build() {
     var step = document.getElementById('PanelStep');
@@ -451,6 +466,7 @@
     initHeader();
     initSummary();
     initRequesterCard();
+    buildBottomBar();
     setupSteps();
 
     var msg = document.getElementById('PanelMessage');
