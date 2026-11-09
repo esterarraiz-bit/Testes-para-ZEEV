@@ -35,6 +35,33 @@
     document.head.appendChild(style);
   }
 
+  // Relatórios (/report/*): aplica as cores da CRP (azul #2A4B8D,
+  // vermelho #E6373B, laranja #F6A730). Só nas páginas de relatório.
+  function estilizarRelatorios(){
+    if(!/^\/report(\/|$)/.test(location.pathname)) return;
+    if(document.body && document.body.classList) document.body.classList.add('crp-report');
+    if(document.getElementById('crp-report-style')) return;
+    var style = document.createElement('style');
+    style.id = 'crp-report-style';
+    style.textContent =
+      'body.crp-report{background:#F5F7FC !important;color:#22304F !important;font-family:Roboto,"Segoe UI",Arial,sans-serif !important;}' +
+      'body.crp-report .dock-main{background:#F5F7FC !important;}' +
+      'body.crp-report h1,body.crp-report h2,body.crp-report h3,body.crp-report h4,body.crp-report h5{color:#2A4B8D !important;font-weight:700 !important;}' +
+      'body.crp-report a{color:#2A4B8D !important;}' +
+      'body.crp-report .btn{border-radius:10px !important;font-weight:600 !important;box-shadow:none !important;}' +
+      'body.crp-report .btn-primary{--bs-btn-bg:#2A4B8D;--bs-btn-border-color:#2A4B8D;--bs-btn-hover-bg:#223E77;--bs-btn-hover-border-color:#223E77;--bs-btn-active-bg:#223E77;--bs-btn-active-border-color:#223E77;--bs-btn-color:#fff;--bs-btn-hover-color:#fff;background:#2A4B8D !important;border-color:#2A4B8D !important;color:#fff !important;}' +
+      'body.crp-report .btn-outline-secondary{--bs-btn-color:#2A4B8D;--bs-btn-border-color:#C7D4EA;--bs-btn-hover-color:#2A4B8D;--bs-btn-hover-bg:#E4ECFB;--bs-btn-hover-border-color:#2A4B8D;--bs-btn-active-color:#2A4B8D;--bs-btn-active-bg:#E4ECFB;--bs-btn-active-border-color:#2A4B8D;color:#2A4B8D !important;border-color:#C7D4EA !important;background-color:#FFFFFF !important;}' +
+      'body.crp-report .btn-outline-danger{--bs-btn-color:#E6373B;--bs-btn-border-color:#E6373B;--bs-btn-hover-bg:#FDECEC;--bs-btn-hover-color:#C62828;--bs-btn-hover-border-color:#C62828;color:#E6373B !important;border-color:#E6373B !important;background:#fff !important;}' +
+      'body.crp-report .form-control,body.crp-report .form-select{border:1px solid #E3E8F3 !important;border-radius:8px !important;}' +
+      'body.crp-report .form-control:focus,body.crp-report .form-select:focus{border-color:#2A4B8D !important;outline:3px solid rgba(42,75,141,.15) !important;box-shadow:none !important;}' +
+      'body.crp-report table.table thead th,body.crp-report table.instance-list thead th{background:#F5F7FC !important;color:#5B6B8C !important;text-transform:uppercase !important;font-size:11px !important;letter-spacing:.04em !important;font-weight:600 !important;border-bottom:1px solid #E3E8F3 !important;}' +
+      'body.crp-report table.table tbody td{border-color:#EEF1F7 !important;color:#22304F !important;}' +
+      'body.crp-report table.table tbody tr:hover>*{background:#F5F9FF !important;}' +
+      'body.crp-report .badge.bg-primary{background:#2A4B8D !important;}' +
+      'body.crp-report .btn-link.link-secondary,body.crp-report .btn-dock-header{color:#2A4B8D !important;}';
+    document.head.appendChild(style);
+  }
+
   function inserirLogin(){
     if(!location.href.includes('/login') || document.getElementById('bv-l')) return;
     var form = document.querySelector('form');
@@ -100,9 +127,10 @@
     parent.after(clone);
   }
 
-  new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
+  new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
   estilizarLogin();
   estilizarNotificacoes();
+  estilizarRelatorios();
   setTimeout(inserirLogin, 600);
   setTimeout(inserirSuporte, 1000);
 })();
