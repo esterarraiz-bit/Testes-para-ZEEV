@@ -101,3 +101,53 @@ body.pop .box.spaced .large{ color:#2A4B8D !important; }
 /* Destaques de estado */
 body.pop .text-danger, body.pop .danger{ color:#E6373B !important; }
 body.pop .text-success, body.pop .success{ color:#2E7D32 !important; }
+
+/* ===== Formulário em grade: reduz a rolagem vertical ===== */
+body.pop #PanelForm table.form{ display:block !important; width:100% !important; }
+body.pop #PanelForm table.form > tbody{
+  display:grid !important;
+  grid-template-columns:repeat(4, minmax(0,1fr)) !important;
+  gap:14px 24px !important;
+  align-items:start !important;
+  padding:6px 0 0 !important;
+}
+/* Cada linha vira um "campo" (rótulo em cima, valor embaixo) */
+body.pop #PanelForm table.form > tbody > tr{ display:block !important; min-width:0; }
+/* Cabeçalho do grupo ocupa a linha inteira */
+body.pop #PanelForm table.form > tbody > tr.group{
+  grid-column:1 / -1 !important;
+  margin:0 0 4px !important;
+  padding:0 0 6px !important;
+  border-bottom:1px solid #E3E8F3 !important;
+}
+body.pop #PanelForm table.form > tbody > tr > td{
+  display:block !important;
+  padding:0 !important;
+  border:0 !important;
+}
+body.pop #PanelForm table.form > tbody > tr > td.col0{
+  font-size:11px !important;
+  color:#5B6B8C !important;
+  text-transform:uppercase !important;
+  letter-spacing:.03em !important;
+  font-weight:600 !important;
+  margin-bottom:2px !important;
+}
+body.pop #PanelForm table.form > tbody > tr > td.col1{
+  font-size:14px !important;
+  color:#22304F !important;
+  overflow-wrap:anywhere !important;
+}
+/* Multivaloradas, anexos e textarea ocupam a linha inteira */
+body.pop #PanelForm table.form > tbody > tr:has(table[mult="S"]),
+body.pop #PanelForm table.form > tbody > tr:has(.containerFormFileLink),
+body.pop #PanelForm table.form > tbody > tr:has([data-fieldformat="FILE"]),
+body.pop #PanelForm table.form > tbody > tr:has(textarea){
+  grid-column:1 / -1 !important;
+}
+@media (max-width:1200px){
+  body.pop #PanelForm table.form > tbody{ grid-template-columns:repeat(2, minmax(0,1fr)) !important; }
+}
+@media (max-width:700px){
+  body.pop #PanelForm table.form > tbody{ grid-template-columns:minmax(0,1fr) !important; }
+}
