@@ -248,10 +248,25 @@
       });
     };
 
+    var tasks = unique(active.map(function (tr) { return cell(tr, cols.task); }));
+    var resps = unique(active.map(cleanResp));
+    var seenItem = {};
+    var items = active.map(function (tr) {
+      return { task: cell(tr, cols.task), resp: cleanResp(tr) };
+    }).filter(function (it) {
+      var k = it.task + '|' + it.resp;
+      if (!it.task || seenItem[k]) return false;
+      seenItem[k] = true;
+      return true;
+    });
+
     return {
       status: unique(active.map(function (tr) { return cell(tr, cols.status); })).join(' · '),
-      task: unique(active.map(function (tr) { return cell(tr, cols.task); })).join(' · '),
-      resp: unique(active.map(cleanResp)).join(' · '),
+      task: tasks.join(' · '),
+      resp: resps.join(' · '),
+      tasks: tasks,
+      resps: resps,
+      items: items,
       updated: lastMovement(rows, cols),
       count: active.length
     };
@@ -286,9 +301,16 @@
     var snap = stepSnapshot();
     if (snap) {
       var many = snap.count > 1;
+      var lots = snap.count > 2;
       if (snap.status) pairs.push({ label: 'Situação atual', value: snap.status, status: statusClass(snap.status) });
-      if (snap.task) pairs.push({ label: many ? 'Etapas atuais' : 'Etapa atual', value: snap.task });
-      if (snap.resp) pairs.push({ label: many ? 'Responsáveis atuais' : 'Responsável atual', value: snap.resp });
+      if (lots) {
+        // Muitas tarefas: resume em contagem e deixa a lista recolhida abaixo.
+        pairs.push({ label: 'Etapas atuais', value: snap.count + ' tarefas em andamento' });
+        pairs.push({ label: 'Responsáveis atuais', value: snap.resps.length + (snap.resps.length === 1 ? ' responsável' : ' responsáveis') });
+      } else {
+        if (snap.task) pairs.push({ label: many ? 'Etapas atuais' : 'Etapa atual', value: snap.task });
+        if (snap.resp) pairs.push({ label: many ? 'Responsáveis atuais' : 'Responsável atual', value: snap.resp });
+      }
       if (snap.updated) pairs.push({ label: 'Última movimentação', value: snap.updated });
     }
 
@@ -317,6 +339,23 @@
         grid.appendChild(item);
       });
       card.appendChild(grid);
+
+      if (lots && snap.items.length) {
+        var det = el('details', 'crp-active');
+        var sum = el('summary', 'crp-active-sum');
+        sum.appendChild(el('span', 'crp-active-title', 'Tarefas em andamento'));
+        sum.appendChild(el('span', 'crp-active-count', String(snap.count)));
+        det.appendChild(sum);
+        var ul = el('ul', 'crp-active-list');
+        snap.items.forEach(function (it) {
+          var li = el('li', 'crp-active-item');
+          li.appendChild(el('span', 'crp-active-task', it.task || '—'));
+          if (it.resp) li.appendChild(el('span', 'crp-active-resp', it.resp));
+          ul.appendChild(li);
+        });
+        det.appendChild(ul);
+        card.appendChild(det);
+      }
     } else if (h4s.length) {
       var raw = el('div', 'crp-summary-raw');
       h4s.forEach(function (h) { raw.appendChild(h); });

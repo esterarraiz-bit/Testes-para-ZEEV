@@ -181,6 +181,30 @@ body.pop .crp-status-tag.crp-step-done{ background:var(--crp-green-bg); color:va
 body.pop .crp-status-tag.crp-step-running{ background:var(--crp-run-bg); color:var(--crp-blue); }
 body.pop .crp-status-tag.crp-step-error{ background:var(--crp-error-bg); color:var(--crp-error); }
 body.pop .crp-status-tag.crp-step-pending{ background:var(--crp-read); color:var(--crp-muted); }
+/* Muitas tarefas em paralelo: lista recolhível, sem poluir o resumo */
+body.pop .crp-active{
+  margin-top:14px; border:1px solid var(--crp-line); border-radius:var(--crp-radius-inner);
+  background:var(--crp-bg); overflow:hidden;
+}
+body.pop .crp-active-sum{
+  display:flex; align-items:center; gap:8px; margin:0; padding:11px 14px;
+  color:var(--crp-blue); font-size:13px; font-weight:600; cursor:pointer;
+  list-style:none;
+}
+body.pop .crp-active-sum::-webkit-details-marker{ display:none; }
+body.pop .crp-active-sum::after{ content:"+"; margin-left:auto; font-size:16px; line-height:1; color:var(--crp-blue-soft); }
+body.pop .crp-active[open] .crp-active-sum::after{ content:"–"; }
+body.pop .crp-active-count{
+  padding:1px 8px; border:1px solid var(--crp-border); border-radius:999px;
+  background:#fff; color:var(--crp-blue); font-size:11px; font-weight:600;
+}
+body.pop .crp-active-list{ margin:0; padding:0 14px 6px; list-style:none; }
+body.pop .crp-active-item{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px;
+  padding:8px 0; border-top:1px solid var(--crp-line); font-size:13px;
+}
+body.pop .crp-active-task{ color:var(--crp-text); font-weight:600; }
+body.pop .crp-active-resp{ color:var(--crp-muted); font-size:12px; }
 /* ---------- Solicitante e abertura ---------- */
 body.pop .crp-req-grid{
   display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:12px;
