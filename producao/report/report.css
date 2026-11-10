@@ -602,54 +602,93 @@ body.pop #tblFile tbody{
 }
 body.pop #tblFile tbody > tr{
   display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; min-width:0;
-  background:#fff !important; border:1px solid var(--crp-line) !important;
-  border-radius:var(--crp-radius-inner) !important; padding:14px !important;
-  transition:border-color .15s ease, box-shadow .15s ease;
+  background:linear-gradient(180deg,#FFFFFF 0%,#FBFDFF 100%) !important;
+  border:1px solid var(--crp-line) !important;
+  border-radius:14px !important; padding:16px !important;
+  box-shadow:0 1px 2px rgba(5,63,136,.04);
+  transition:border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
-body.pop #tblFile tbody > tr:hover{ border-color:var(--crp-border) !important; box-shadow:0 6px 18px rgba(5,63,136,.10); }
+body.pop #tblFile tbody > tr:hover{
+  border-color:#B9CCEB !important; box-shadow:0 10px 26px rgba(5,63,136,.12);
+  transform:translateY(-1px);
+}
 body.pop #tblFile tbody > tr:has(.alert){ grid-column:1/-1; display:block; background:transparent !important; border:0 !important; padding:0 !important; box-shadow:none !important; }
 body.pop #tblFile tbody > tr > td{ border:0 !important; padding:0 !important; background:transparent !important; }
 body.pop #tblFile td.lock,body.pop #tblFile td.del,body.pop #tblFile td.process{ display:none !important; }
+/* divisor entre o cabeçalho do arquivo e os metadados */
+body.pop #tblFile tr.file-tr::after{
+  content:""; order:5; flex:0 0 100%; height:1px; background:var(--crp-line); margin:6px 0 0;
+}
 body.pop #tblFile td.fileicon{
-  order:1; flex:0 0 auto; width:44px; height:44px; border-radius:10px;
-  background:var(--crp-read) !important; border:1px solid var(--crp-border) !important;
+  order:1; flex:0 0 auto; width:48px; height:48px; border-radius:12px;
+  background:linear-gradient(135deg,#EAF0F8 0%,#DCE7F7 100%) !important;
+  border:1px solid var(--crp-border) !important;
   display:inline-flex; align-items:center; justify-content:center; color:var(--crp-blue);
   overflow:hidden;
 }
-body.pop #tblFile td.fileicon img{ max-width:24px; max-height:24px; object-fit:contain; }
+body.pop #tblFile td.fileicon img{ max-width:26px; max-height:26px; object-fit:contain; }
 body.pop #tblFile td.fileicon i{ font-size:20px; }
 body.pop #tblFile td.filename{ order:2; flex:1 1 120px; min-width:0; }
 body.pop #tblFile td.filename a{
-  display:block; color:var(--crp-text) !important; font-size:14px; font-weight:600 !important;
-  text-decoration:none !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden; color:var(--crp-text) !important; font-size:14.5px; font-weight:600 !important;
+  line-height:1.35; text-decoration:none !important; overflow-wrap:anywhere;
 }
 body.pop #tblFile td.filename a:hover{ color:var(--crp-blue) !important; }
 body.pop #tblFile td.docType{ order:3; flex:0 0 auto; }
 body.pop #tblFile td.docType:not(:empty){
   padding:2px 8px !important; border:1px solid var(--crp-border); border-radius:999px;
-  background:var(--crp-read); color:var(--crp-blue-soft); font-size:10.5px; font-weight:600;
+  background:#fff; color:var(--crp-blue-soft); font-size:10.5px; font-weight:600;
+  text-transform:uppercase;
 }
 body.pop #tblFile td.filedonwload,body.pop #tblFile td.download{ order:4; flex:0 0 auto; margin-left:auto; }
 body.pop #tblFile td.filedonwload a,body.pop #tblFile td.download a{
-  display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px;
-  border-radius:9px; border:1px solid var(--crp-border) !important; background:#fff !important; color:var(--crp-blue) !important;
-  text-decoration:none !important;
+  display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px;
+  border-radius:10px; border:0 !important; background:var(--crp-blue) !important; color:#fff !important;
+  text-decoration:none !important; box-shadow:0 2px 6px rgba(5,63,136,.22);
+  transition:background-color .15s ease, box-shadow .15s ease;
 }
-body.pop #tblFile td.filedonwload a:hover,body.pop #tblFile td.download a:hover{ background:var(--crp-read) !important; border-color:var(--crp-blue) !important; }
-body.pop #tblFile td.date{ order:5; flex:0 0 auto; margin-top:4px; color:var(--crp-muted) !important; font-size:12px; }
-body.pop #tblFile td.actor{ order:6; flex:1 1 100px; min-width:0; margin-top:4px; color:var(--crp-muted) !important; font-size:12px; }
+body.pop #tblFile td.filedonwload a:hover,body.pop #tblFile td.download a:hover{
+  background:var(--crp-blue-dark) !important; box-shadow:0 4px 12px rgba(5,63,136,.28);
+}
+body.pop #tblFile td.filedonwload a .icon,body.pop #tblFile td.download a .icon{ color:#fff !important; font-size:15px; }
+body.pop #tblFile td.date{
+  order:6; flex:0 0 auto; display:inline-flex; align-items:center; gap:6px;
+  color:var(--crp-muted) !important; font-size:11.5px;
+}
+body.pop #tblFile td.date::before{
+  content:""; flex:0 0 13px; width:13px; height:13px; background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+body.pop #tblFile td.actor{
+  order:7; flex:1 1 90px; min-width:0; display:flex; align-items:center; gap:6px;
+  color:var(--crp-muted) !important; font-size:11.5px;
+}
+body.pop #tblFile td.actor::before{
+  content:""; flex:0 0 13px; width:13px; height:13px; background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21a8 8 0 0 1 16 0'/%3E%3C/svg%3E") center/contain no-repeat;
+}
 body.pop #tblFile td.actor .user{ display:flex; align-items:center; gap:6px; min-width:0; }
 body.pop #tblFile td.actor .user-photo{ display:none !important; }
 body.pop #tblFile td.actor .user-content{ min-width:0; }
 body.pop #tblFile td.actor .user-content .small{ display:none !important; }
 body.pop #tblFile td.actor strong{
-  display:block; color:var(--crp-muted) !important; font-size:12px !important; font-weight:500 !important;
+  display:block; color:var(--crp-muted) !important; font-size:11.5px !important; font-weight:500 !important;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-body.pop #tblFile td.task{ order:7; flex:0 0 auto; margin-top:4px; }
+body.pop #tblFile td.task{ order:8; flex:0 0 auto; }
 body.pop #tblFile td.task:not(:empty){
+  display:inline-flex; align-items:center; gap:5px; max-width:100%;
   padding:2px 8px !important; border:1px solid var(--crp-border); border-radius:999px;
-  background:#fff; color:var(--crp-blue-soft); font-size:10.5px; font-weight:600;
+  background:var(--crp-read); color:var(--crp-blue-soft); font-size:10.5px; font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+body.pop #tblFile td.task:not(:empty)::before{
+  content:""; flex:0 0 11px; width:11px; height:11px; background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z'/%3E%3C/svg%3E") center/contain no-repeat;
 }
 
 /* ---------- Histórico (timeline) ---------- */
