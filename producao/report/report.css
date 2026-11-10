@@ -637,8 +637,8 @@ body.pop #tblFile td.filename a{
 body.pop #tblFile td.filename a:hover{ color:var(--crp-blue) !important; }
 body.pop #tblFile td.docType{ order:3; flex:0 0 auto; }
 body.pop #tblFile td.docType:not(:empty){
-  padding:2px 8px !important; border:1px solid var(--crp-border); border-radius:999px;
-  background:#fff; color:var(--crp-blue-soft); font-size:10.5px; font-weight:600;
+  padding:2px 8px !important; border:1px solid var(--crp-border) !important; border-radius:999px;
+  background:#fff !important; color:var(--crp-blue-soft) !important; font-size:10.5px; font-weight:600;
   text-transform:uppercase;
 }
 body.pop #tblFile td.filedonwload,body.pop #tblFile td.download{ order:4; flex:0 0 auto; margin-left:auto; }
@@ -681,8 +681,8 @@ body.pop #tblFile td.actor strong{
 body.pop #tblFile td.task{ order:8; flex:0 0 auto; }
 body.pop #tblFile td.task:not(:empty){
   display:inline-flex; align-items:center; gap:5px; max-width:100%;
-  padding:2px 8px !important; border:1px solid var(--crp-border); border-radius:999px;
-  background:var(--crp-read); color:var(--crp-blue-soft); font-size:10.5px; font-weight:600;
+  padding:2px 8px !important; border:1px solid var(--crp-border) !important; border-radius:999px;
+  background:var(--crp-read) !important; color:var(--crp-blue-soft) !important; font-size:10.5px; font-weight:600;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 body.pop #tblFile td.task:not(:empty)::before{
