@@ -367,9 +367,9 @@ body.pop #PanelForm{
   background:transparent !important; border:0 !important; box-shadow:none !important;
 }
 body.pop #PanelForm > h2{ display:none !important; }
-/* O Zeev envolve o formulário numa tabela de layout com 95% de largura,
-   alinhada à esquerda. Ocupa 100% para os grupos ficarem centralizados. */
-body.pop #PanelForm > table{ width:100% !important; max-width:100% !important; margin:0 auto !important; }
+/* O Zeev envolve o formulário na tabela de layout #FrmExecute com 95% de
+   largura, alinhada à esquerda. Ocupa 100% para os grupos ficarem centralizados. */
+body.pop #FrmExecute{ width:100% !important; max-width:100% !important; margin:0 auto !important; }
 
 /* Seção = bloco com borda e faixa de título */
 body.pop #PanelForm table.form{
