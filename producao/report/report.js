@@ -241,6 +241,12 @@
       });
       active = [best || rows[rows.length - 1]];
     }
+    // Mesma ordem da tabela: em andamento por data de início.
+    active.sort(function (a, b) {
+      var sa = parseStamp(cell(a, cols.start));
+      var sb = parseStamp(cell(b, cols.start));
+      return (sa === null ? Infinity : sa) - (sb === null ? Infinity : sb);
+    });
 
     var cleanResp = function (tr) {
       return cell(tr, cols.resp)
