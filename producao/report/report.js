@@ -456,10 +456,20 @@
     if (!tbody) return;
 
     var allRows = toArr(tbody.children);
+    // Cabeçalhos (a tabela do Zeev os coloca no tbody) ficam sempre no topo.
+    var isHeaderRow = function (tr) {
+      if (isStepHead(tr)) return true;
+      var tsk = txt(tr.children[cols.task]).toLowerCase();
+      var st = txt(tr.children[cols.status]).toLowerCase();
+      return /^(tarefa|atividade)\b/.test(tsk) && (st === 'status' || /situa/.test(st));
+    };
+    var headRows = allRows.filter(isHeaderRow);
     var dataRows = allRows.filter(function (tr) {
-      return !isStepHead(tr) && tr.children.length > 2 && !!txt(tr);
+      return headRows.indexOf(tr) === -1 && tr.children.length > 2 && !!txt(tr);
     });
-    var tailRows = allRows.filter(function (tr) { return dataRows.indexOf(tr) === -1; });
+    var tailRows = allRows.filter(function (tr) {
+      return headRows.indexOf(tr) === -1 && dataRows.indexOf(tr) === -1;
+    });
 
     var groupOf = function (tr) {
       var s = txt(tr.children[cols.status]).toLowerCase();
@@ -483,6 +493,7 @@
         var kb = parseStamp(txt(b.children[key]));
         return (ka === null ? Infinity : ka) - (kb === null ? Infinity : kb);
       });
+      headRows.forEach(function (tr) { tbody.appendChild(tr); });
       list.forEach(function (tr) { tbody.appendChild(tr); });
       tailRows.forEach(function (tr) { tbody.appendChild(tr); });
     };
