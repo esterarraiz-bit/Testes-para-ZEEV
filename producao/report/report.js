@@ -491,6 +491,9 @@
         var key = ga === 0 ? cols.end : cols.start;
         var ka = parseStamp(txt(a.children[key]));
         var kb = parseStamp(txt(b.children[key]));
+        // Sem data de conclusão (ex.: tarefa inicial): usa a data de início.
+        if (ka === null) ka = parseStamp(txt(a.children[cols.start]));
+        if (kb === null) kb = parseStamp(txt(b.children[cols.start]));
         return (ka === null ? Infinity : ka) - (kb === null ? Infinity : kb);
       });
       headRows.forEach(function (tr) { tbody.appendChild(tr); });
