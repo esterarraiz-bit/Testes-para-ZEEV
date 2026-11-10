@@ -154,10 +154,15 @@
     if (req) {
       var strong = req.querySelector('strong');
       var name = txt(strong).replace(/\s*\([^)]*\)\s*$/, '');
-      var mail = txt(req.querySelector('.small'));
+      var mail = '';
+      toArr(req.querySelectorAll('.small')).some(function (s) {
+        var v = txt(s);
+        if (v.indexOf('@') > -1) { mail = v; return true; }
+        return false;
+      });
       if (!mail) {
-        var pm = txt(strong).match(/\(([^)]+@[^)]+)\)/);
-        if (pm) mail = pm[1].toLowerCase();
+        var pm = txt(strong).match(/\(([^)]+@[^)]+)\)/) || txt(req).match(/[\w.+-]+@[\w.-]+\.\w+/);
+        if (pm) mail = (pm[1] || pm[0]).toLowerCase();
       }
       if (name) {
         var av = el('span', 'crp-kv-avatar', initials(name));
