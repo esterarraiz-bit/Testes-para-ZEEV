@@ -776,15 +776,62 @@
     });
   }
 
-  /* ---------- Mensagens: avatar com iniciais ---------- */
+  /* ---------- Mensagens: cartão limpo (avatar + nome/e-mail + data) ---------- */
   function setupMessages() {
     var t = document.getElementById('tblMessage');
     if (!t) return;
     toArr(t.querySelectorAll('tbody > tr')).forEach(function (tr) {
       if (tr.querySelector('.alert')) return;
+      if (tr.getAttribute('data-crp-msg') === '1') return;
+
       var actor = tr.querySelector('td.actor');
-      if (!actor || actor.querySelector('.crp-avatar')) return;
-      actor.insertBefore(el('span', 'crp-avatar', initials(txt(actor))), actor.firstChild);
+      var dateTd = tr.querySelector('td.date');
+      var msgTd = tr.querySelector('td.message');
+      var taskTd = tr.querySelector('td.task');
+      if (!actor || !msgTd) return;
+
+      var nameEl = actor.querySelector('.user-content strong') || actor.querySelector('strong');
+      var mailEl = actor.querySelector('.user-content .small');
+      var name = txt(nameEl || actor).replace(/\s*\([^)]*@[^)]*\)\s*/g, '').trim();
+      var mail = mailEl ? txt(mailEl) : '';
+      if (!mail || mail.indexOf('@') < 0) {
+        var mm = txt(actor).match(/[\w.+-]+@[\w.-]+\.\w+/);
+        mail = mm ? mm[0] : '';
+      }
+
+      var dateRaw = dateTd ? txt(dateTd) : '';
+      var dm = dateRaw.match(/(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?/);
+      var dateText = dm ? (dm[1] + (dm[2] ? ' ' + dm[2] : '')) : dateRaw;
+      var bubble = msgTd.querySelector('.comment-text') || msgTd;
+      var task = taskTd ? txt(taskTd) : '';
+
+      var cell = el('td', 'crp-msg-cell');
+      cell.colSpan = 7;
+      var art = el('article', 'crp-msg');
+
+      var head = el('header', 'crp-msg-head');
+      head.appendChild(el('span', 'crp-msg-avatar', initials(name)));
+      var idWrap = el('div', 'crp-msg-id');
+      idWrap.appendChild(el('span', 'crp-msg-name', name || '—'));
+      if (mail) idWrap.appendChild(el('span', 'crp-msg-mail', mail));
+      head.appendChild(idWrap);
+      if (dateText) head.appendChild(el('span', 'crp-msg-date', dateText));
+      art.appendChild(head);
+
+      var bub = el('div', 'crp-msg-bubble');
+      bub.appendChild(bubble);
+      art.appendChild(bub);
+
+      if (task) {
+        var foot = el('footer', 'crp-msg-foot');
+        foot.appendChild(el('span', 'crp-msg-task', task));
+        art.appendChild(foot);
+      }
+
+      cell.appendChild(art);
+      while (tr.firstChild) tr.removeChild(tr.firstChild);
+      tr.appendChild(cell);
+      tr.setAttribute('data-crp-msg', '1');
     });
   }
 
