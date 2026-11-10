@@ -223,23 +223,37 @@
     if (!rows.length) return null;
 
     var cell = function (tr, i) { return tr.children[i] ? txt(tr.children[i]) : ''; };
-    var current = null;
-    rows.forEach(function (tr) {
-      var s = cell(tr, cols.status).toLowerCase();
-      if (/andamento|execu|atual|em curso|abert/.test(s)) current = tr;
-    });
-    if (!current) current = rows[rows.length - 1];
+    var isRunning = function (tr) {
+      return /andamento|execu|atual|em curso|abert/.test(cell(tr, cols.status).toLowerCase());
+    };
 
-    var resp = cell(current, cols.resp)
-      .replace(/^\s*[A-Z]{2}\s+/, '')
-      .replace(/\s*[\w.+-]+@[\w.-]+\S*$/, '')
-      .trim();
+    // Pode haver mais de uma tarefa ativa ao mesmo tempo (paralelas, com
+    // responsáveis distintos): o resumo lista todas.
+    var active = rows.filter(isRunning);
+    if (!active.length) active = [rows[rows.length - 1]];
+
+    var cleanResp = function (tr) {
+      return cell(tr, cols.resp)
+        .replace(/^\s*[A-Z]{2}\s+/, '')
+        .replace(/\s*[\w.+-]+@[\w.-]+\S*$/, '')
+        .trim();
+    };
+
+    var unique = function (list) {
+      var seen = {};
+      return list.filter(function (v) {
+        if (!v || seen[v]) return false;
+        seen[v] = true;
+        return true;
+      });
+    };
 
     return {
-      status: cell(current, cols.status),
-      task: cell(current, cols.task),
-      resp: resp,
-      updated: lastMovement(rows, cols)
+      status: unique(active.map(function (tr) { return cell(tr, cols.status); })).join(' · '),
+      task: unique(active.map(function (tr) { return cell(tr, cols.task); })).join(' · '),
+      resp: unique(active.map(cleanResp)).join(' · '),
+      updated: lastMovement(rows, cols),
+      count: active.length
     };
   }
 
@@ -271,9 +285,10 @@
     var pairs = [];
     var snap = stepSnapshot();
     if (snap) {
+      var many = snap.count > 1;
       if (snap.status) pairs.push({ label: 'Situação atual', value: snap.status, status: statusClass(snap.status) });
-      if (snap.task) pairs.push({ label: 'Etapa atual', value: snap.task });
-      if (snap.resp) pairs.push({ label: 'Responsável atual', value: snap.resp });
+      if (snap.task) pairs.push({ label: many ? 'Etapas atuais' : 'Etapa atual', value: snap.task });
+      if (snap.resp) pairs.push({ label: many ? 'Responsáveis atuais' : 'Responsável atual', value: snap.resp });
       if (snap.updated) pairs.push({ label: 'Última movimentação', value: snap.updated });
     }
 
