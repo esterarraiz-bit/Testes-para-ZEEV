@@ -559,7 +559,7 @@ body.pop #ContainerAttach #annex > .row-fluid > .span3{
   display:flex; align-items:center; gap:8px; order:2;
 }
 body.pop #link-see-all-docs{
-  display:inline-flex !important; align-items:center; gap:8px;
+  box-sizing:border-box; display:inline-flex !important; align-items:center; gap:8px;
   height:36px; padding:0 14px !important;
   border:1px solid var(--crp-border) !important; border-radius:var(--crp-radius-ctrl) !important;
   background:#fff !important; color:var(--crp-blue) !important;
@@ -570,7 +570,7 @@ body.pop #link-see-all-docs{
 body.pop #link-see-all-docs:hover{ background:var(--crp-read) !important; border-color:var(--crp-blue) !important; }
 body.pop #link-see-all-docs .icon{ color:var(--crp-blue); font-size:14px; }
 body.pop #ContainerAttach label[for="inpShowFileVersion"]{
-  display:inline-flex !important; align-items:center; gap:8px; margin:0 !important;
+  box-sizing:border-box; display:inline-flex !important; align-items:center; gap:8px; margin:0 !important;
   height:36px; padding:0 12px;
   border:1px solid var(--crp-border); border-radius:999px;
   background:#fff; color:var(--crp-muted) !important;
@@ -584,7 +584,7 @@ body.pop #ContainerAttach label[for="inpShowFileVersion"]:has(input:checked){
 body.pop #ContainerAttach #inpShowFileVersion{ margin:0; accent-color:var(--crp-blue); }
 body.pop #ContainerAttach .reorder-files-label{ color:var(--crp-muted) !important; font-size:12px; white-space:nowrap; }
 body.pop #ContainerAttach .reorder-files-combo{
-  height:36px !important; padding:0 32px 0 10px !important;
+  box-sizing:border-box; height:36px !important; padding:0 32px 0 10px !important;
   border:1px solid var(--crp-border) !important; border-radius:var(--crp-radius-ctrl) !important;
   background-color:#fff !important; color:var(--crp-text) !important;
   font-size:12.5px !important;
