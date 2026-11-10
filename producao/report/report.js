@@ -835,6 +835,155 @@
     });
   }
 
+  /* ---------- Anexos: cartão do arquivo ---------- */
+  function fileExt(name) {
+    var m = String(name || '').match(/\.([a-z0-9]{1,6})$/i);
+    return m ? m[1].toLowerCase() : '';
+  }
+
+  function fileTypeClass(ext, kind) {
+    var k = (ext + ' ' + kind).toLowerCase();
+    if (/pdf/.test(k)) return 'crp-f-pdf';
+    if (/xls|xlsx|csv|planilha|spreadsheet/.test(k)) return 'crp-f-sheet';
+    if (/doc|docx|word|texto/.test(k)) return 'crp-f-doc';
+    if (/zip|rar|7z|compact/.test(k)) return 'crp-f-zip';
+    return 'crp-f-gen';
+  }
+
+  function setupFiles() {
+    var t = document.getElementById('tblFile');
+    if (!t) return;
+    toArr(t.querySelectorAll('tbody > tr')).forEach(function (tr) {
+      if (tr.getAttribute('data-crp-file') === '1') return;
+      if (tr.querySelector('.alert')) return;
+
+      var nameTd = tr.querySelector('td.filename');
+      var link = nameTd && nameTd.querySelector('a');
+      if (!link) return;
+
+      var img = tr.querySelector('td.fileicon img');
+      var dl = tr.querySelector('td.filedonwload a, td.download a');
+      var dateTd = tr.querySelector('td.date');
+      var actorTd = tr.querySelector('td.actor');
+      var taskTd = tr.querySelector('td.task');
+      var typeTd = tr.querySelector('td.docType');
+
+      var name = txt(link);
+      var ext = fileExt(name);
+      var kind = typeTd ? txt(typeTd) : '';
+      if (!kind && ext) kind = ext.toUpperCase();
+      var isImg = /^(png|jpe?g|gif|webp|bmp|svg)$/.test(ext);
+      var typeCls = fileTypeClass(ext, kind);
+
+      var strong = actorTd && actorTd.querySelector('strong');
+      var author = strong ? txt(strong) : (actorTd ? txt(actorTd).split('\n')[0] : '');
+      author = author.replace(/\s*\([^)]*@[^)]*\)\s*/g, '').trim();
+
+      var dateRaw = dateTd ? txt(dateTd) : '';
+      var dm = dateRaw.match(/(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+      var dateText = dm ? dm[1] + '/' + dm[2] + '/' + dm[3] + (dm[4] ? ' ' + dm[4] + ':' + dm[5] : '') : dateRaw;
+      var dateISO = dm ? dm[3] + '-' + dm[2] + '-' + dm[1] + 'T' + (dm[4] || '00') + ':' + (dm[5] || '00') : '';
+      var task = taskTd ? txt(taskTd).split('\n')[0].trim() : '';
+
+      var href = link.getAttribute('href') || '#';
+      var cell = el('td', 'crp-file-cell');
+      cell.colSpan = tr.children.length || 10;
+      var art = el('article', 'crp-file');
+
+      var head = el('div', 'crp-file-main');
+      var thumb = el('a', 'crp-file-thumb ' + typeCls);
+      thumb.href = href;
+      thumb.target = '_blank';
+      thumb.rel = 'noopener';
+      thumb.setAttribute('data-colorbox', 'true');
+      thumb.title = 'Visualizar arquivo';
+      thumb.setAttribute('aria-label', 'Visualizar arquivo');
+      if (isImg && img) {
+        img.className = 'crp-file-img';
+        img.setAttribute('loading', 'lazy');
+        img.addEventListener('error', function () {
+          img.remove();
+          thumb.appendChild(el('span', 'crp-file-type'));
+        });
+        thumb.appendChild(img);
+      } else {
+        thumb.appendChild(el('span', 'crp-file-type'));
+      }
+      head.appendChild(thumb);
+
+      var info = el('div', 'crp-file-info');
+      link.className = 'crp-file-name';
+      link.setAttribute('title', name);
+      info.appendChild(link);
+
+      var sub = el('div', 'crp-file-sub');
+      if (kind) sub.appendChild(el('span', 'crp-file-kind', kind));
+      var sizeEl = tr.querySelector('.size, td.size, [data-size]');
+      var sizeTxt = sizeEl ? txt(sizeEl) : '';
+      if (sizeTxt) {
+        if (kind) sub.appendChild(el('span', 'crp-file-dot', '·'));
+        sub.appendChild(el('span', 'crp-file-size', sizeTxt));
+      }
+      if (sub.children.length) info.appendChild(sub);
+      head.appendChild(info);
+
+      var actions = el('div', 'crp-file-actions');
+      var view = el('a', 'crp-file-btn crp-file-view');
+      view.href = href;
+      view.target = '_blank';
+      view.rel = 'noopener';
+      view.setAttribute('data-colorbox', 'true');
+      view.title = 'Visualizar arquivo';
+      view.setAttribute('aria-label', 'Visualizar arquivo');
+      view.appendChild(el('span', 'crp-file-ic crp-ic-eye'));
+      actions.appendChild(view);
+
+      if (dl) {
+        dl.className = 'crp-file-btn crp-file-dl';
+        dl.title = 'Baixar arquivo';
+        dl.setAttribute('aria-label', 'Baixar arquivo');
+        while (dl.firstChild) dl.removeChild(dl.firstChild);
+        dl.appendChild(el('span', 'crp-file-ic crp-ic-dl'));
+        actions.appendChild(dl);
+      }
+      head.appendChild(actions);
+      art.appendChild(head);
+
+      var meta = el('div', 'crp-file-meta');
+      if (dateText) {
+        var time = el('time', 'crp-file-time');
+        if (dateISO) time.setAttribute('datetime', dateISO);
+        time.appendChild(el('span', 'crp-file-ic crp-ic-clock'));
+        time.appendChild(document.createTextNode(dateText));
+        meta.appendChild(time);
+      }
+      if (author) {
+        var au = el('span', 'crp-file-author');
+        au.appendChild(el('span', 'crp-file-ic crp-ic-user'));
+        au.appendChild(el('span', 'crp-file-author-txt', author));
+        meta.appendChild(au);
+      }
+      if (task) {
+        var tk = el('span', 'crp-file-task');
+        tk.title = task;
+        tk.appendChild(el('span', 'crp-file-ic crp-ic-tag'));
+        tk.appendChild(el('span', 'crp-file-task-txt', task));
+        meta.appendChild(tk);
+      }
+      if (meta.children.length) art.appendChild(meta);
+
+      art.addEventListener('click', function (e) {
+        if (e.target.closest('a,button')) return;
+        link.click();
+      });
+
+      cell.appendChild(art);
+      while (tr.firstChild) tr.removeChild(tr.firstChild);
+      tr.appendChild(cell);
+      tr.setAttribute('data-crp-file', '1');
+    });
+  }
+
   /* ---------- Histórico (timeline a partir do passo a passo) ---------- */
   function buildHistorico() {
     var t = document.getElementById('TableStep');
@@ -1023,6 +1172,7 @@
 
     setupForm(form);
     setupMessages();
+    setupFiles();
     markMaskEmpty();
     setTimeout(markMaskEmpty, 1200);
     setTimeout(markMaskEmpty, 2600);
