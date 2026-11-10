@@ -206,6 +206,54 @@
     }
   }
 
+  /* Instantâneo genérico da solicitação: funciona em qualquer fluxo, pois lê
+     somente a tabela de passo a passo (situação, etapa e responsável atuais). */
+  function stepSnapshot() {
+    var t = document.getElementById('TableStep');
+    if (!t) return null;
+    var cols = stepColumns(t);
+    var rows = toArr(t.querySelectorAll('tbody > tr')).filter(function (tr) {
+      return !isStepHead(tr) && tr.children.length > 1 && txt(tr);
+    });
+    if (!rows.length) return null;
+
+    var cell = function (tr, i) { return tr.children[i] ? txt(tr.children[i]) : ''; };
+    var current = null;
+    rows.forEach(function (tr) {
+      var s = cell(tr, cols.status).toLowerCase();
+      if (/andamento|execu|atual|em curso|abert/.test(s)) current = tr;
+    });
+    if (!current) current = rows[rows.length - 1];
+
+    var resp = cell(current, cols.resp)
+      .replace(/^\s*[A-Z]{2}\s+/, '')
+      .replace(/\s*[\w.+-]+@[\w.-]+\S*$/, '')
+      .trim();
+
+    return {
+      status: cell(current, cols.status),
+      task: cell(current, cols.task),
+      resp: resp,
+      updated: lastMovement(rows, cols)
+    };
+  }
+
+  function lastMovement(rows, cols) {
+    var best = null;
+    rows.forEach(function (tr) {
+      [cols.start, cols.end].forEach(function (i) {
+        var raw = tr.children[i] ? txt(tr.children[i]) : '';
+        var m = raw.match(/(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+        if (!m) return;
+        var stamp = new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0)).getTime();
+        if (!best || stamp > best.stamp) {
+          best = { stamp: stamp, text: m[1] + '/' + m[2] + '/' + m[3] + (m[4] ? ' ' + m[4] + ':' + m[5] : '') };
+        }
+      });
+    });
+    return best ? best.text : '';
+  }
+
   function initSummary() {
     if (document.querySelector('.crp-summary-card')) return;
     var step = document.getElementById('PanelStep');
@@ -216,12 +264,23 @@
     });
 
     var pairs = [];
-    h4s.forEach(function (h) {
-      txt(h).split(/\n|\|/).forEach(function (part) {
-        var mm = part.trim().match(/^([^:]{1,60}):\s*(.*)$/);
-        if (mm) pairs.push({ label: mm[1].trim(), value: mm[2].trim() });
+    var snap = stepSnapshot();
+    if (snap) {
+      if (snap.status) pairs.push({ label: 'Situação atual', value: snap.status, status: statusClass(snap.status) });
+      if (snap.task) pairs.push({ label: 'Etapa atual', value: snap.task });
+      if (snap.resp) pairs.push({ label: 'Responsável atual', value: snap.resp });
+      if (snap.updated) pairs.push({ label: 'Última movimentação', value: snap.updated });
+    }
+
+    // Fallback: sem tabela de passos, aproveita o resumo nativo do relatório.
+    if (!pairs.length) {
+      h4s.forEach(function (h) {
+        txt(h).split(/\n|\|/).forEach(function (part) {
+          var mm = part.trim().match(/^([^:]{1,60}):\s*(.*)$/);
+          if (mm) pairs.push({ label: mm[1].trim(), value: mm[2].trim() });
+        });
       });
-    });
+    }
 
     var card = panelReq || el('div');
     card.classList.add('crp-card', 'crp-summary-card');
@@ -233,17 +292,23 @@
         var item = el('div', 'crp-kv');
         item.appendChild(el('span', 'crp-kv-label', p.label));
         var v = el('span', 'crp-kv-value' + (p.value ? '' : ' is-empty'), p.value || '—');
+        if (p.status) v.className += ' crp-status-tag ' + p.status;
         item.appendChild(v);
         grid.appendChild(item);
       });
       card.appendChild(grid);
-      var parent = h4s[0].parentElement;
-      h4s.forEach(function (h) { h.classList.add('crp-src-hidden'); });
-      hideIfEmpty(parent, '#PanelStep, .title, #PanelForm, #PanelRequester');
     } else if (h4s.length) {
       var raw = el('div', 'crp-summary-raw');
       h4s.forEach(function (h) { raw.appendChild(h); });
       card.appendChild(raw);
+    }
+
+    // Esconde o resumo nativo (campos específicos do fluxo): eles continuam
+    // disponíveis, completos, na aba Geral › Dados da solicitação.
+    if (pairs.length && h4s.length) {
+      var parent = h4s[0].parentElement;
+      h4s.forEach(function (h) { h.classList.add('crp-src-hidden'); });
+      hideIfEmpty(parent, '#PanelStep, .title, #PanelForm, #PanelRequester');
     }
 
     if (!panelReq) {

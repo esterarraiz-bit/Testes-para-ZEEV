@@ -173,6 +173,14 @@ body.pop .crp-kv-label{
 }
 body.pop .crp-kv-value{ color:var(--crp-text); font-size:14px; font-weight:600; overflow-wrap:anywhere; }
 body.pop .crp-kv-value.is-empty{ color:#9AA8C2; font-weight:400; }
+body.pop .crp-kv-value.crp-status-tag{
+  display:inline-block; width:auto; padding:3px 10px; border-radius:999px;
+  background:var(--crp-read); color:var(--crp-blue); font-size:12px; font-weight:600;
+}
+body.pop .crp-status-tag.crp-step-done{ background:var(--crp-green-bg); color:var(--crp-green); }
+body.pop .crp-status-tag.crp-step-running{ background:var(--crp-run-bg); color:var(--crp-blue); }
+body.pop .crp-status-tag.crp-step-error{ background:var(--crp-error-bg); color:var(--crp-error); }
+body.pop .crp-status-tag.crp-step-pending{ background:var(--crp-read); color:var(--crp-muted); }
 /* ---------- Solicitante e abertura ---------- */
 body.pop .crp-req-grid{
   display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:12px;
