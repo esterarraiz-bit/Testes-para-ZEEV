@@ -227,7 +227,7 @@
     // Regra do fluxo: só "em andamento" está aberto; qualquer outro status
     // significa tarefa concluída (inclusive cancelada).
     var isRunning = function (tr) {
-      return /andamento|executando|em execu/.test(cell(tr, cols.status).toLowerCase());
+      return /andamento|executando|em execu/.test(statusLabel(tr.children[cols.status]).toLowerCase());
     };
 
     // Pode haver mais de uma tarefa ativa ao mesmo tempo (paralelas, com
@@ -278,7 +278,7 @@
     });
 
     return {
-      status: unique(active.map(function (tr) { return cell(tr, cols.status); })).join(' · '),
+      status: unique(active.map(function (tr) { return statusLabel(tr.children[cols.status]); })).join(' · '),
       task: tasks.join(' · '),
       resp: resps.join(' · '),
       tasks: tasks,
@@ -301,7 +301,7 @@
       var sc = tr.children[cols.status];
       // Em tarefa aberta, a "conclusão" é a data prevista: não conta como
       // movimentação. Só a data de início é real.
-      var running = /andamento|executando|em execu/.test((sc ? txt(sc) : '').toLowerCase());
+      var running = /andamento|executando|em execu/.test(statusLabel(sc).toLowerCase());
       var idxs = running ? [cols.start] : [cols.end, cols.start];
       idxs.forEach(function (i) {
         var raw = tr.children[i] ? txt(tr.children[i]) : '';
@@ -419,6 +419,28 @@
     return 'crp-step-pending';
   }
 
+  /* O status e a justificativa ficam na mesma célula ("Revisão solicitada
+     Teste"). Estes helpers separam só o status, deixando a justificativa
+     fora do pill e fora dos filtros. */
+  function statusNode(cell) {
+    if (!cell) return null;
+    var pill = cell.querySelector('.crp-status-pill');
+    if (pill) return pill;
+    var strong = cell.querySelector('strong, b');
+    if (strong) return strong;
+    var first = cell.firstElementChild;
+    if (first && /conclu|andamento|cancel|reprov|aprov|revis|stand|pendente|abert|aguard|finaliz|erro|falh/i.test(txt(first))) return first;
+    return null;
+  }
+
+  function statusLabel(cell) {
+    if (!cell) return '';
+    var node = statusNode(cell);
+    if (node) return txt(node).replace(/\s+/g, ' ').trim();
+    var lines = txt(cell).split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    return (lines[0] || '').replace(/\s+/g, ' ');
+  }
+
   function isStepHead(tr) {
     return !!tr.querySelector('[class^="table-step-col"], th');
   }
@@ -453,12 +475,30 @@
       if (isStepHead(tr)) { tr.classList.add('crp-step-head'); return; }
       if (!txt(tr)) { tr.classList.add('crp-row-empty'); return; }
       var statusCell = tr.children[cols.status];
-      var cls = statusClass(txt(statusCell));
+      if (!statusCell) return;
+      var label = statusLabel(statusCell);
+      var cls = statusClass(label);
       tr.classList.add(cls);
-      if (statusCell && txt(statusCell) && !statusCell.querySelector('.crp-status-pill')) {
+      if (label && !statusCell.querySelector('.crp-status-pill')) {
+        // Texto completo = status + justificativa; separa os dois.
+        var full = txt(statusCell).replace(/\s+/g, ' ').trim();
+        var rest = full.indexOf(label) === 0 ? full.slice(label.length) : full.replace(label, ' ');
+        rest = rest.replace(/^[\s:;,\-–—]+/, '').trim();
+
+        statusCell.innerHTML = '';
         var pill = el('span', 'crp-status-pill ' + cls);
-        while (statusCell.firstChild) pill.appendChild(statusCell.firstChild);
+        pill.textContent = label;
         statusCell.appendChild(pill);
+
+        if (rest && rest.toLowerCase() !== label.toLowerCase()) {
+          var note = el('div', 'crp-step-note');
+          note.setAttribute('title', rest);
+          var nic = el('span', 'crp-step-note-ic');
+          nic.setAttribute('aria-hidden', 'true');
+          note.appendChild(nic);
+          note.appendChild(el('span', 'crp-step-note-text', rest));
+          statusCell.appendChild(note);
+        }
       }
     });
 
@@ -484,7 +524,7 @@
     });
 
     var groupOf = function (tr) {
-      var s = txt(tr.children[cols.status]).toLowerCase();
+      var s = statusLabel(tr.children[cols.status]).toLowerCase();
       // 0 = concluídas (qualquer status que não seja "em andamento")
       // 1 = em andamento
       return /andamento|executando|em execu/.test(s) ? 1 : 0;
@@ -522,7 +562,7 @@
       var filterState = {};
       var emptyRow = null;
       var statusOf = function (tr) {
-        return txt(tr.children[cols.status]).replace(/\s+/g, ' ').trim();
+        return statusLabel(tr.children[cols.status]);
       };
       var statusList = [];
       var statusCount = {};
