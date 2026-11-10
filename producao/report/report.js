@@ -223,8 +223,10 @@
     if (!rows.length) return null;
 
     var cell = function (tr, i) { return tr.children[i] ? txt(tr.children[i]) : ''; };
+    // Regra do fluxo: só "em andamento" está aberto; qualquer outro status
+    // significa tarefa concluída (inclusive cancelada).
     var isRunning = function (tr) {
-      return /andamento|execu|atual|em curso|abert/.test(cell(tr, cols.status).toLowerCase());
+      return /andamento|executando|em execu/.test(cell(tr, cols.status).toLowerCase());
     };
 
     // Pode haver mais de uma tarefa ativa ao mesmo tempo (paralelas, com
@@ -289,13 +291,18 @@
   function lastMovement(rows, cols) {
     var best = null;
     rows.forEach(function (tr) {
-      [cols.start, cols.end].forEach(function (i) {
+      var sc = tr.children[cols.status];
+      // Em tarefa aberta, a "conclusão" é a data prevista: não conta como
+      // movimentação. Só a data de início é real.
+      var running = /andamento|executando|em execu/.test((sc ? txt(sc) : '').toLowerCase());
+      var idxs = running ? [cols.start] : [cols.end, cols.start];
+      idxs.forEach(function (i) {
         var raw = tr.children[i] ? txt(tr.children[i]) : '';
-        var m = raw.match(/(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
-        if (!m) return;
-        var stamp = new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0)).getTime();
+        var stamp = parseStamp(raw);
+        if (stamp === null) return;
+        var m = raw.match(/(\d{2}\/\d{2}\/\d{4})(?:\s+(\d{2}:\d{2}))?/);
         if (!best || stamp > best.stamp) {
-          best = { stamp: stamp, text: m[1] + '/' + m[2] + '/' + m[3] + (m[4] ? ' ' + m[4] + ':' + m[5] : '') };
+          best = { stamp: stamp, text: m ? m[1] + (m[2] ? ' ' + m[2] : '') : raw };
         }
       });
     });
@@ -473,9 +480,9 @@
 
     var groupOf = function (tr) {
       var s = txt(tr.children[cols.status]).toLowerCase();
-      if (/conclu|fechad|finaliz/.test(s)) return 0;
-      if (/andamento|execu|atual|em curso|abert/.test(s)) return 1;
-      return 2;
+      // 0 = concluídas (qualquer status que não seja "em andamento")
+      // 1 = em andamento
+      return /andamento|executando|em execu/.test(s) ? 1 : 0;
     };
 
     var applySort = function (mode) {
