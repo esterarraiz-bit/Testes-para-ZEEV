@@ -243,6 +243,19 @@ body.pop .box.spaced > h2{
   border-bottom:1px solid var(--crp-line);
   font-size:16px !important; line-height:1.3 !important;
 }
+body.pop .crp-step-toolbar{ display:flex; justify-content:flex-end; margin:0 0 10px; }
+body.pop .crp-sort-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  height:32px; padding:0 12px;
+  border:1px solid var(--crp-border); border-radius:var(--crp-radius-ctrl);
+  background:#fff; color:var(--crp-blue);
+  font-size:12px; font-weight:600; line-height:1; white-space:nowrap;
+  cursor:pointer; transition:background-color .15s ease, border-color .15s ease;
+}
+body.pop .crp-sort-btn:hover{ background:var(--crp-read); border-color:var(--crp-blue); }
+body.pop .crp-sort-btn:focus-visible{ outline:2px solid var(--crp-blue); outline-offset:2px; }
+body.pop .crp-sort-ic{ display:inline-flex; }
+body.pop .crp-sort-ic svg{ width:16px; height:16px; display:block; }
 body.pop .crp-table-wrap{
   width:100%; overflow-x:auto;
   border:1px solid var(--crp-border); border-radius:var(--crp-radius-inner);

@@ -230,7 +230,15 @@
     // Pode haver mais de uma tarefa ativa ao mesmo tempo (paralelas, com
     // responsáveis distintos): o resumo lista todas.
     var active = rows.filter(isRunning);
-    if (!active.length) active = [rows[rows.length - 1]];
+    if (!active.length) {
+      // Sem tarefa ativa: usa a linha com a movimentação mais recente.
+      var best = null, bestStamp = -1;
+      rows.forEach(function (tr) {
+        var st = parseStamp(cell(tr, cols.end)) || parseStamp(cell(tr, cols.start));
+        if (st && st > bestStamp) { bestStamp = st; best = tr; }
+      });
+      active = [best || rows[rows.length - 1]];
+    }
 
     var cleanResp = function (tr) {
       return cell(tr, cols.resp)
@@ -270,6 +278,12 @@
       updated: lastMovement(rows, cols),
       count: active.length
     };
+  }
+
+  function parseStamp(raw) {
+    var m = String(raw || '').match(/(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?/);
+    if (!m) return null;
+    return new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0)).getTime();
   }
 
   function lastMovement(rows, cols) {
@@ -435,6 +449,70 @@
         statusCell.appendChild(pill);
       }
     });
+
+    /* Ordenação: por padrão conclusão (mais antiga → mais nova) e depois as
+       em andamento (por início). Alternativa: tudo por data de início. */
+    var tbody = t.tBodies[0];
+    if (!tbody) return;
+
+    var allRows = toArr(tbody.children);
+    var dataRows = allRows.filter(function (tr) {
+      return !isStepHead(tr) && tr.children.length > 2 && !!txt(tr);
+    });
+    var tailRows = allRows.filter(function (tr) { return dataRows.indexOf(tr) === -1; });
+
+    var groupOf = function (tr) {
+      var s = txt(tr.children[cols.status]).toLowerCase();
+      if (/conclu|fechad|finaliz/.test(s)) return 0;
+      if (/andamento|execu|atual|em curso|abert/.test(s)) return 1;
+      return 2;
+    };
+
+    var applySort = function (mode) {
+      var list = dataRows.slice();
+      list.sort(function (a, b) {
+        if (mode === 'start') {
+          var sa = parseStamp(txt(a.children[cols.start]));
+          var sb = parseStamp(txt(b.children[cols.start]));
+          return (sa === null ? Infinity : sa) - (sb === null ? Infinity : sb);
+        }
+        var ga = groupOf(a), gb = groupOf(b);
+        if (ga !== gb) return ga - gb;
+        var key = ga === 0 ? cols.end : cols.start;
+        var ka = parseStamp(txt(a.children[key]));
+        var kb = parseStamp(txt(b.children[key]));
+        return (ka === null ? Infinity : ka) - (kb === null ? Infinity : kb);
+      });
+      list.forEach(function (tr) { tbody.appendChild(tr); });
+      tailRows.forEach(function (tr) { tbody.appendChild(tr); });
+    };
+
+    var wrap = t.parentElement;
+    var holder = wrap.parentNode || wrap;
+    if (!holder.querySelector('.crp-step-toolbar')) {
+      var bar = el('div', 'crp-step-toolbar');
+      var btn = el('button', 'crp-sort-btn');
+      btn.type = 'button';
+      var mode = 'end';
+      var sync = function () {
+        btn.innerHTML = '';
+        btn.appendChild(icon('calendar', 'crp-sort-ic'));
+        btn.appendChild(el('span', 'crp-sort-text', 'Ordenar: ' + (mode === 'end' ? 'conclusão' : 'início')));
+        btn.title = mode === 'end'
+          ? 'Ordenando por conclusão e depois em andamento. Clique para ordenar por data de início.'
+          : 'Ordenando por data de início. Clique para ordenar por conclusão e depois em andamento.';
+        btn.setAttribute('aria-label', btn.title);
+      };
+      btn.addEventListener('click', function () {
+        mode = mode === 'end' ? 'start' : 'end';
+        applySort(mode);
+        sync();
+      });
+      sync();
+      bar.appendChild(btn);
+      holder.insertBefore(bar, wrap);
+    }
+    applySort('end');
   }
 
   /* ---------- Formulário: accordions, campos vazios, títulos ---------- */
