@@ -334,10 +334,8 @@
       if (lots) {
         // Muitas tarefas: resume em contagem e deixa a lista recolhida abaixo.
         pairs.push({ label: 'Etapas atuais', value: snap.count + ' tarefas em andamento' });
-        pairs.push({ label: 'Responsáveis atuais', value: snap.resps.length + (snap.resps.length === 1 ? ' responsável' : ' responsáveis') });
       } else {
         if (snap.task) pairs.push({ label: many ? 'Etapas atuais' : 'Etapa atual', value: snap.task });
-        if (snap.resp) pairs.push({ label: many ? 'Responsáveis atuais' : 'Responsável atual', value: snap.resp });
       }
       if (snap.updated) pairs.push({ label: 'Última movimentação', value: snap.updated });
     }
