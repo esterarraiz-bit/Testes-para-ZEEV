@@ -15,7 +15,8 @@
     info: SVG + '<circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>',
     user: SVG + '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
     calendar: SVG + '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>',
-    hero: SVG + '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6"/></svg>'
+    hero: SVG + '<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><path d="M6 9v3a3 3 0 0 0 3 3h6"/></svg>',
+    filter: SVG + '<path d="M4 5h16l-6 7v5l-4 2v-7z"/></svg>'
   };
 
   var toArr = function (list) { return Array.prototype.slice.call(list || []); };
@@ -518,6 +519,107 @@
     var holder = wrap.parentNode || wrap;
     if (!holder.querySelector('.crp-step-toolbar')) {
       var bar = el('div', 'crp-step-toolbar');
+
+      /* Filtros por status */
+      var filterState = {};
+      var emptyRow = null;
+      var statusOf = function (tr) {
+        return txt(tr.children[cols.status]).replace(/\s+/g, ' ').trim();
+      };
+      var statusList = [];
+      var statusCount = {};
+      dataRows.forEach(function (tr) {
+        var s = statusOf(tr);
+        if (!s) return;
+        if (!statusCount[s]) { statusCount[s] = 0; statusList.push(s); }
+        statusCount[s]++;
+      });
+
+      var ensureEmpty = function (show) {
+        if (!emptyRow) {
+          emptyRow = el('tr', 'crp-step-empty');
+          var td = el('td');
+          td.colSpan = headRows[0] ? headRows[0].children.length : 7;
+          td.textContent = 'Nenhuma tarefa com os filtros selecionados.';
+          emptyRow.appendChild(td);
+        }
+        if (show && !emptyRow.parentNode) tbody.appendChild(emptyRow);
+        if (!show && emptyRow.parentNode) emptyRow.parentNode.removeChild(emptyRow);
+      };
+
+      var filterWrap = el('div', 'crp-step-filter');
+      var fbtn = el('button', 'crp-filter-btn');
+      fbtn.type = 'button';
+      fbtn.setAttribute('aria-haspopup', 'true');
+      fbtn.setAttribute('aria-expanded', 'false');
+      var menu = el('div', 'crp-filter-menu');
+      menu.hidden = true;
+
+      var allLabel = el('label', 'crp-filter-opt');
+      var allCb = document.createElement('input');
+      allCb.type = 'checkbox';
+      allCb.value = '__all';
+      allCb.checked = true;
+      allLabel.appendChild(allCb);
+      allLabel.appendChild(el('span', 'crp-filter-name', 'Todos'));
+      menu.appendChild(allLabel);
+
+      statusList.forEach(function (s) {
+        var lab = el('label', 'crp-filter-opt');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = s;
+        lab.appendChild(cb);
+        lab.appendChild(el('span', 'crp-filter-name', s));
+        lab.appendChild(el('span', 'crp-filter-n', String(statusCount[s])));
+        menu.appendChild(lab);
+      });
+
+      var syncFilter = function () {
+        var active = Object.keys(filterState).filter(function (k) { return filterState[k]; });
+        fbtn.innerHTML = '';
+        fbtn.appendChild(icon('filter', 'crp-filter-ic'));
+        fbtn.appendChild(el('span', 'crp-filter-text', 'Filtros'));
+        if (active.length) fbtn.appendChild(el('span', 'crp-filter-count', String(active.length)));
+        fbtn.title = active.length ? 'Filtros ativos: ' + active.join(', ') : 'Filtrar por status';
+        fbtn.setAttribute('aria-label', fbtn.title);
+        allCb.checked = active.length === 0;
+        toArr(menu.querySelectorAll('input')).forEach(function (cb) {
+          if (cb.value !== '__all') cb.checked = !!filterState[cb.value];
+        });
+      };
+
+      var applyFilter = function () {
+        var active = Object.keys(filterState).filter(function (k) { return filterState[k]; });
+        var any = active.length > 0;
+        var visible = 0;
+        dataRows.forEach(function (tr) {
+          var show = !any || active.indexOf(statusOf(tr)) > -1;
+          tr.hidden = !show;
+          if (show) visible++;
+        });
+        ensureEmpty(any && visible === 0);
+        syncFilter();
+      };
+
+      var refresh = function () { applySort(mode); applyFilter(); };
+
+      menu.addEventListener('change', function (e) {
+        var cb = e.target;
+        if (!cb || cb.type !== 'checkbox') return;
+        filterState = cb.value === '__all' ? {} : filterState;
+        if (cb.value !== '__all') filterState[cb.value] = cb.checked;
+        refresh();
+      });
+
+      fbtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+        fbtn.setAttribute('aria-expanded', String(!menu.hidden));
+      });
+      filterWrap.appendChild(fbtn);
+      filterWrap.appendChild(menu);
+
       var btn = el('button', 'crp-sort-btn');
       btn.type = 'button';
       var mode = 'end';
@@ -532,14 +634,32 @@
       };
       btn.addEventListener('click', function () {
         mode = mode === 'end' ? 'start' : 'end';
-        applySort(mode);
+        refresh();
         sync();
       });
       sync();
+
+      bar.appendChild(filterWrap);
       bar.appendChild(btn);
       holder.insertBefore(bar, wrap);
+
+      document.addEventListener('click', function (e) {
+        if (!menu.hidden && !filterWrap.contains(e.target)) {
+          menu.hidden = true;
+          fbtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !menu.hidden) {
+          menu.hidden = true;
+          fbtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      refresh();
+    } else {
+      applySort('end');
     }
-    applySort('end');
   }
 
   /* ---------- Formulário: accordions, campos vazios, títulos ---------- */
