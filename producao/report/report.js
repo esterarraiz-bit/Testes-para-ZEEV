@@ -880,9 +880,12 @@
       author = author.replace(/\s*\([^)]*@[^)]*\)\s*/g, '').trim();
 
       var dateRaw = dateTd ? txt(dateTd) : '';
-      var dm = dateRaw.match(/(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
-      var dateText = dm ? dm[1] + '/' + dm[2] + '/' + dm[3] + (dm[4] ? ' ' + dm[4] + ':' + dm[5] : '') : dateRaw;
-      var dateISO = dm ? dm[3] + '-' + dm[2] + '-' + dm[1] + 'T' + (dm[4] || '00') + ':' + (dm[5] || '00') : '';
+      var dm = dateRaw.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+      var tmEl = dateTd && dateTd.querySelector('.muted');
+      var tm = tmEl ? txt(tmEl).match(/(\d{2}:\d{2})/) : dateRaw.match(/(\d{2}:\d{2})/);
+      var clock = tm ? tm[1] : '';
+      var dateText = dm ? dm[0] + (clock ? ' ' + clock : '') : dateRaw;
+      var dateISO = dm ? dm[3] + '-' + dm[2] + '-' + dm[1] + 'T' + (clock || '00:00') : '';
       var task = taskTd ? txt(taskTd).split('\n')[0].trim() : '';
 
       var href = link.getAttribute('href') || '#';
