@@ -187,24 +187,34 @@ body.pop .crp-active{
   background:var(--crp-bg); overflow:hidden;
 }
 body.pop .crp-active-sum{
-  display:flex; align-items:center; gap:8px; margin:0; padding:11px 14px;
+  display:flex; align-items:center; gap:8px; margin:0; padding:12px 14px;
   color:var(--crp-blue); font-size:13px; font-weight:600; cursor:pointer;
   list-style:none;
 }
 body.pop .crp-active-sum::-webkit-details-marker{ display:none; }
+body.pop .crp-active-sum::before{
+  content:""; flex:0 0 16px; width:16px; height:16px; background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3 3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
 body.pop .crp-active-sum::after{ content:"+"; margin-left:auto; font-size:16px; line-height:1; color:var(--crp-blue-soft); }
-body.pop .crp-active[open] .crp-active-sum::after{ content:"–"; }
+body.pop .crp-active[open] .crp-active-sum::after{ content:"-"; }
 body.pop .crp-active-count{
   padding:1px 8px; border:1px solid var(--crp-border); border-radius:999px;
   background:#fff; color:var(--crp-blue); font-size:11px; font-weight:600;
 }
-body.pop .crp-active-list{ margin:0; padding:0 14px 6px; list-style:none; }
+body.pop .crp-active-list{ margin:0; padding:0 14px 8px; list-style:none; }
 body.pop .crp-active-item{
-  display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 10px;
-  padding:8px 0; border-top:1px solid var(--crp-line); font-size:13px;
+  display:flex; align-items:flex-start; gap:10px; padding:10px 0;
+  border-top:1px solid var(--crp-line);
 }
-body.pop .crp-active-task{ color:var(--crp-text); font-weight:600; }
-body.pop .crp-active-resp{ color:var(--crp-muted); font-size:12px; }
+body.pop .crp-active-item::before{
+  content:""; flex:0 0 7px; width:7px; height:7px; margin-top:6px;
+  border-radius:50%; background:var(--crp-blue-soft);
+}
+body.pop .crp-active-text{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+body.pop .crp-active-task{ color:var(--crp-text); font-size:13px; font-weight:600; line-height:1.35; overflow-wrap:anywhere; }
+body.pop .crp-active-resp{ color:var(--crp-muted); font-size:12px; line-height:1.35; overflow-wrap:anywhere; }
 /* ---------- Solicitante e abertura ---------- */
 body.pop .crp-req-grid{
   display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:12px;

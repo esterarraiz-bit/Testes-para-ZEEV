@@ -343,14 +343,16 @@
       if (lots && snap.items.length) {
         var det = el('details', 'crp-active');
         var sum = el('summary', 'crp-active-sum');
-        sum.appendChild(el('span', 'crp-active-title', 'Tarefas em andamento'));
-        sum.appendChild(el('span', 'crp-active-count', String(snap.count)));
+        sum.appendChild(el('span', 'crp-active-title', 'Tarefas em andamento '));
+        sum.appendChild(el('span', 'crp-active-count', '(' + snap.count + ')'));
         det.appendChild(sum);
         var ul = el('ul', 'crp-active-list');
         snap.items.forEach(function (it) {
           var li = el('li', 'crp-active-item');
-          li.appendChild(el('span', 'crp-active-task', it.task || '—'));
-          if (it.resp) li.appendChild(el('span', 'crp-active-resp', it.resp));
+          var body = el('div', 'crp-active-text');
+          body.appendChild(el('span', 'crp-active-task', it.task || '—'));
+          if (it.resp) body.appendChild(el('span', 'crp-active-resp', it.resp));
+          li.appendChild(body);
           ul.appendChild(li);
         });
         det.appendChild(ul);
