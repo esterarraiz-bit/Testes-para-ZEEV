@@ -1152,9 +1152,8 @@ body.pop .crp-rel-badge.crp-rel-atrasada{ background:var(--crp-error-bg); color:
 body.pop .crp-rel-badge.crp-rel-cancelada{ background:#EEF1F7; color:#5B6B8C; }
 body.pop .crp-rel-badge.crp-rel-neutro{ background:var(--crp-read); color:var(--crp-muted); }
 
-/* Rodapé: Cancelar à esquerda, demais à direita */
-body.pop .crp-bottom-bar-actions{ width:100%; }
-body.pop .crp-bottom-bar-actions > li.crp-ab-cancel{ margin-right:auto; }
+/* Rodapé: todas as ações à direita */
+body.pop .crp-bottom-bar-actions{ width:100%; justify-content:flex-end; }
 
 /* Impressão */
 @media print{
