@@ -1284,3 +1284,14 @@ body.pop #PanelForm table[mult="S"] > thead > tr > td{
 }
 body.pop #PanelForm table[mult="S"] > tbody > tr:not(.header) > td{ padding:10px 12px !important; }
 body.pop #PanelForm table[mult="S"] > tbody > tr:not(.header):hover > td{ background:#F7FAFF !important; }
+/* ---------- Responsavel na timeline / tarefas abertas ---------- */
+body.pop .crp-rel-tl-resp{ align-items:flex-start; }
+body.pop .crp-rel-resp-text{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+body.pop .crp-rel-resp-line1{ color:var(--crp-muted); font-size:12px; line-height:1.4; }
+body.pop .crp-rel-resp-name{ color:var(--crp-text); font-weight:600; }
+body.pop .crp-rel-resp-line2{ color:var(--crp-muted); font-size:11.5px; line-height:1.35; }
+body.pop .crp-rel-tl-sub,
+body.pop .crp-rel-open-sub{ flex:1 1 100%; color:var(--crp-muted); font-size:12px; line-height:1.4; margin-top:2px; }
+body.pop .crp-rel-open-resp{ margin-left:auto; align-items:flex-start; }
+body.pop .crp-rel-open .crp-rel-resp-line1{ font-size:11.5px; }
+body.pop .crp-rel-open .crp-rel-resp-line2{ font-size:11px; }

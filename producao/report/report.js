@@ -1822,10 +1822,10 @@
     }).map(function (tr) {
       var c = function (i) { return tr.children[i] ? txt(tr.children[i]) : ''; };
       var respCell = tr.children[cols.resp];
+      var respRaw = txt(respCell);
       var email = '';
-      var m = txt(respCell).match(/[\w.+-]+@[\w.-]+\.\w+/);
+      var m = respRaw.match(/[\w.+-]+@[\w.-]+\.\w+/);
       if (m) email = m[0];
-      var resp = txt(respCell).replace(/^\s*[A-Z]{2}\s+/, '').replace(/[\w.+-]+@[\w.-]+\.\w+.*$/, '').trim();
 
       // Título × instruções: o que vier depois da 1ª linha (ou em .task-desc)
       // é descrição recolhível. Critério genérico, sem nome de fluxo.
@@ -1841,17 +1841,23 @@
         if (lines.length > 1) { title = lines[0]; desc = lines.slice(1).join('\n'); }
       }
 
+      // "Título NOME | Empresa | CLT | Início: ..." → título + subtítulo cinza.
+      var subtitle = '';
+      var pp = String(title).split('|').map(function (s) { return s.trim(); }).filter(Boolean);
+      if (pp.length > 1) { title = pp[0]; subtitle = pp.slice(1).join(' · '); }
+
       var end = c(cols.end);
       var open = /andamento|execu|atual/i.test(c(cols.status));
       var endStamp = parseStamp(end);
       return {
         task: title || taskText,
         desc: desc,
+        subtitle: subtitle,
         start: c(cols.start),
         end: end,
         statusRaw: c(cols.status),
         status: relStatus(c(cols.status)),
-        resp: resp,
+        resp: respRaw,
         email: email,
         open: open,
         late: open && endStamp !== null && endStamp < Date.now()
@@ -1870,6 +1876,47 @@
     var s = String(raw || '').trim();
     var m = s.match(/^(.*?)\s+00:00(?::0\d)?$/);
     return m ? m[1] : s;
+  }
+
+  /* Responsável: e-mail por regex; antes = nome; depois = cargo; trecho final
+     entre parênteses = empresa. Sem e-mail, o texto todo é o nome. */
+  function relParseResp(raw, emailHint) {
+    var s = String(raw || '').replace(/\s+/g, ' ').trim().replace(/^\s*[A-Z]{2}\s+/, '');
+    if (!s) return { name: '', cargo: '', empresa: '', email: emailHint || '' };
+    var email = emailHint || '';
+    var m = s.match(/[\w.+-]+@[\w.-]+\.\w+/);
+    if (!m) return { name: s, cargo: '', empresa: '', email: email };
+    email = email || m[0];
+    var before = s.slice(0, m.index).trim().replace(/[·,;-]\s*$/, '');
+    var after = s.slice(m.index + m[0].length).trim().replace(/^[·,;-]\s*/, '');
+    var empresa = '';
+    var em = after.match(/\(([^)]+)\)\s*$/);
+    if (em) { empresa = em[1].trim(); after = after.slice(0, em.index).trim(); }
+    if (!empresa && /(S\.?\s*A\.?|LTDA|EIRELI|ME|EPP)\s*$/i.test(after)) { empresa = after; after = ''; }
+    return { name: before || s, cargo: after, empresa: empresa, email: email };
+  }
+
+  function relRespBlock(x) {
+    var p = relParseResp(x.resp, x.email);
+    if (!p.name) return null;
+    var wrap = el('div', 'crp-rel-tl-resp');
+    var av = el('span', 'crp-rel-avatar', initials(p.name));
+    av.setAttribute('aria-hidden', 'true');
+    wrap.appendChild(av);
+    var box = el('div', 'crp-rel-resp-text');
+    var l1 = el('div', 'crp-rel-resp-line1');
+    var verb;
+    if (x.open) verb = 'Responsável: ';
+    else if (/aprov/i.test(x.statusRaw || '')) verb = 'Aprovada por ';
+    else verb = x.end ? ('Concluída em ' + x.end + ' por ') : 'Concluída por ';
+    l1.appendChild(document.createTextNode(verb));
+    l1.appendChild(el('span', 'crp-rel-resp-name', p.name));
+    box.appendChild(l1);
+    var l2 = [p.cargo, p.empresa].filter(Boolean).join(' · ');
+    if (l2) box.appendChild(el('div', 'crp-rel-resp-line2', l2));
+    wrap.appendChild(box);
+    if (p.email) wrap.title = p.email;
+    return wrap;
   }
 
   function relSteps() {
@@ -1914,24 +1961,20 @@
       var li = el('div', 'crp-rel-tl-item ' + (x.late ? 'atrasada' : x.status.cls));
       var top = el('div', 'crp-rel-tl-top');
       top.appendChild(el('span', 'crp-rel-tl-task', x.task || '—'));
-      top.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
+      if (String(x.statusRaw || '').trim()) {
+        top.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
+      }
       li.appendChild(top);
+      if (x.subtitle) li.appendChild(el('div', 'crp-rel-tl-sub', x.subtitle));
       var meta = el('div', 'crp-rel-tl-meta');
       if (x.open) {
         if (parseStamp(x.end) !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + relPrazo(x.end)));
-      } else if (x.end) {
+      } else if (x.end && !(x.resp || x.email)) {
         meta.appendChild(el('span', 'crp-rel-tl-conc', 'Concluído em ' + x.end));
       }
       if (meta.children.length) li.appendChild(meta);
-      if (x.resp || x.email) {
-        var resp = el('div', 'crp-rel-tl-resp');
-        var av = el('span', 'crp-rel-avatar', initials(x.resp));
-        av.setAttribute('aria-hidden', 'true');
-        if (x.email) resp.title = x.email;
-        resp.appendChild(av);
-        resp.appendChild(el('span', 'crp-rel-tl-respname', x.resp || x.email));
-        li.appendChild(resp);
-      }
+      var rb = relRespBlock(x);
+      if (rb) li.appendChild(rb);
       if (x.desc) li.appendChild(relInstr(x.desc));
       if (REL.stepFilter === 'abertas' && !x.open) li.hidden = true;
       return li;
@@ -2011,14 +2054,13 @@
     lista.slice(0, 3).forEach(function (x) {
       var li = el('li', 'crp-rel-open-item');
       li.appendChild(el('span', 'crp-rel-open-task', x.task || '—'));
-      li.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
-      if (parseStamp(x.end) !== null) li.appendChild(el('span', 'crp-rel-open-prazo', 'Prazo: ' + relPrazo(x.end)));
-      if (x.resp) {
-        var r = el('span', 'crp-rel-open-resp');
-        r.appendChild(el('span', 'crp-rel-avatar crp-rel-avatar-sm', initials(x.resp)));
-        r.appendChild(el('span', 'crp-rel-open-respname', x.resp));
-        li.appendChild(r);
+      if (String(x.statusRaw || '').trim()) {
+        li.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
       }
+      if (x.subtitle) li.appendChild(el('div', 'crp-rel-open-sub', x.subtitle));
+      if (parseStamp(x.end) !== null) li.appendChild(el('span', 'crp-rel-open-prazo', 'Prazo: ' + relPrazo(x.end)));
+      var rb = relRespBlock(x);
+      if (rb) { rb.classList.add('crp-rel-open-resp'); li.appendChild(rb); }
       if (x.desc) li.appendChild(relInstr(x.desc));
       ul.appendChild(li);
     });
