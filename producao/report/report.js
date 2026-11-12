@@ -1201,29 +1201,39 @@
     var menu = dd && dd.querySelector('.dropdown-menu');
     if (!menu) return;
 
-    var knownOrder = ['LkCancel', 'LkHoldShowOn', 'LkEdit'];
     var keyOf = { LkEdit: 'edit', LkHoldShowOn: 'hold', LkCancel: 'cancel' };
+    var rankOf = { cancel: 0, hold: 1, edit: 2, reopen: 3, other: 4 };
     var entries = [];
     Array.prototype.forEach.call(menu.children, function (li, idx) {
-      var a = li.querySelector('a');
-      if (!a) return;
-      var label = txt(a);
+      // Qualquer tipo de controle (a, button, input, role=button), não só <a>.
+      var act = li.querySelector('a, button, input[type="button"], input[type="submit"], [role="button"]');
+      if (!act) return;
+      var label = act.tagName === 'INPUT' ? (act.value || '') : txt(act);
+      var id = act.id || '';
+      var norm = String(label)
+        .normalize ? String(label).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim()
+          : String(label).toLowerCase().trim();
       // Excluir nunca aparece; as demais (ex.: Reabrir do super admin) entram.
-      if (a.id === 'LkDelete' || /^excluir$/i.test(label)) {
+      if (id === 'LkDelete' || /^excluir(\s|$)/.test(norm)) {
         if (li.parentNode) li.parentNode.removeChild(li);
         return;
       }
-      var key = keyOf[a.id] || (/reabr/i.test(label) ? 'reopen' : 'other');
+      var key = keyOf[id];
+      if (!key) {
+        if (/reabr/.test(norm)) key = 'reopen';
+        else if (/editar/.test(norm)) key = 'edit';
+        else if (/congelar|stand\s*by|pausar/.test(norm)) key = 'hold';
+        else if (/cancelar/.test(norm)) key = 'cancel';
+        else key = 'other';
+      }
+      act.classList.add('crp-ab-el');
       li.classList.add('crp-ab-' + key);
-      entries.push({ li: li, id: a.id || '', order: idx });
+      entries.push({ li: li, key: key, order: idx });
     });
 
     entries.sort(function (x, y) {
-      var ox = knownOrder.indexOf(x.id);
-      var oy = knownOrder.indexOf(y.id);
-      if (ox < 0) ox = 99;
-      if (oy < 0) oy = 99;
-      if (ox !== oy) return ox - oy;
+      var rx = rankOf[x.key], ry = rankOf[y.key];
+      if (rx !== ry) return rx - ry;
       return x.order - y.order;
     });
 
