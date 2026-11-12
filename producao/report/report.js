@@ -2273,8 +2273,8 @@
   function relBuild() {
     if (relOff() || !relReadMode()) return;
 
-    // Idempotência: remove rodapés/notas criados por nós antes de refazer.
-    toArr(document.querySelectorAll('.crp-rel-footrow, .crp-rel-sec-foot, .crp-rel-mult-note')).forEach(function (n) {
+    // Idempotência: remove rodapés/notas e o card de tarefas abertas.
+    toArr(document.querySelectorAll('.crp-rel-footrow, .crp-rel-sec-foot, .crp-rel-mult-note, #crp-rel-open')).forEach(function (n) {
       n.remove();
     });
 
@@ -2289,7 +2289,16 @@
     relAplicarVazios(relSecoesAtuais);
     relDestaques(relSecoesAtuais);
     relSteps();
-    relOpenTasks();
+    // Card "Tarefas abertas" removido: o passo a passo já mostra tudo.
+    // Mantém apenas a contagem resumida no cabeçalho.
+    var abertas = relStepsData().filter(function (x) { return x.open; });
+    var atrasadas = abertas.filter(function (x) { return x.late; }).length;
+    var heading = document.querySelector('.crp-hero-heading');
+    if (heading) {
+      var resumo = heading.querySelector('.crp-rel-open-summary');
+      if (!resumo) { resumo = el('span', 'crp-rel-open-summary'); heading.appendChild(resumo); }
+      resumo.textContent = abertas.length + ' em aberto · ' + atrasadas + ' atrasada' + (atrasadas === 1 ? '' : 's');
+    }
   }
 
   function relInit() {
