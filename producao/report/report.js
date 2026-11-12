@@ -2455,7 +2455,11 @@
       if (pp.length > 1) { title = pp[0]; subtitle = pp.slice(1).join(' · '); }
 
       var end = c(cols.end);
-      var open = /andamento|execu|atual/i.test(c(cols.status));
+      var stRaw = c(cols.status);
+      // Aberta = qualquer status que não seja terminal (Concluído, Aprovado,
+      // Cancelado, Reprovado, Encerrado...). Status vazio: aberta se sem conclusão.
+      var terminal = /conclu|finaliz|cancel|reprov|recus|encerr|complet|aprovad|closed|done/i.test(stRaw);
+      var open = !terminal;
       var endStamp = parseStamp(end);
       return {
         task: title || taskText,
