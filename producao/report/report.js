@@ -2461,7 +2461,11 @@
       var terminal = /conclu|finaliz|cancel|reprov|recus|encerr|complet|aprovad|closed|done/i.test(stRaw);
       var open = !terminal;
       var endStamp = parseStamp(end);
-      var detailEl = tr.querySelector('a[href*="wfrel_tracker_form_detail"]') || tr.querySelector('td:last-child a[data-colorbox]') || null;
+      var subLink = tr.querySelector('td:first-child a[href*="wfrel_tracker_detail"]') || tr.querySelector('a[href*="wfrel_tracker_detail"]');
+      var formLink = tr.querySelector('a[href*="wfrel_tracker_form_detail"]') || tr.querySelector('td:last-child a[data-colorbox]');
+      var detailEl = subLink || formLink || null;
+      var detailSub = !!subLink;
+      var detailNewTab = !!(detailEl && (detailEl.getAttribute('target') === '_blank' || /wfrel_tracker_detail/i.test(detailEl.getAttribute('href') || '')));
       return {
         task: title || taskText,
         desc: desc,
@@ -2475,6 +2479,8 @@
         people: people,
         executor: executor,
         detailEl: detailEl,
+        detailSub: detailSub,
+        detailNewTab: detailNewTab,
         open: open,
         late: open && endStamp !== null && endStamp < Date.now()
       };
@@ -2753,20 +2759,29 @@
     function item(x) {
       var li = el('div', 'crp-rel-tl-item ' + (x.late ? 'atrasada' : x.status.cls));
       var top = el('div', 'crp-rel-tl-top');
-      var taskEl = el('span', 'crp-rel-tl-task', x.task || '—');
-      if (x.detailEl) {
-        taskEl.classList.add('crp-rel-tl-task-link');
-        taskEl.title = 'Abrir detalhes da tarefa/subprocesso';
-        taskEl.setAttribute('role', 'link');
-        taskEl.tabIndex = 0;
-        var abrirDetalhe = function (e) {
-          if (e) e.preventDefault();
-          try { x.detailEl.click(); } catch (err) {}
-        };
-        taskEl.addEventListener('click', abrirDetalhe);
-        taskEl.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirDetalhe(); }
-        });
+      var taskEl;
+      if (x.detailEl && x.detailNewTab) {
+        taskEl = el('a', 'crp-rel-tl-task crp-rel-tl-task-link', x.task || '—');
+        taskEl.href = x.detailEl.href;
+        taskEl.target = '_blank';
+        taskEl.rel = 'noopener';
+        taskEl.title = 'Abrir subprocesso em nova aba';
+      } else {
+        taskEl = el('span', 'crp-rel-tl-task', x.task || '—');
+        if (x.detailEl) {
+          taskEl.classList.add('crp-rel-tl-task-link');
+          taskEl.title = 'Abrir detalhes da tarefa';
+          taskEl.setAttribute('role', 'link');
+          taskEl.tabIndex = 0;
+          var abrirDetalhe = function (e) {
+            if (e) e.preventDefault();
+            try { x.detailEl.click(); } catch (err) {}
+          };
+          taskEl.addEventListener('click', abrirDetalhe);
+          taskEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirDetalhe(); }
+          });
+        }
       }
       top.appendChild(taskEl);
       if (String(x.statusRaw || '').trim()) {
@@ -2788,13 +2803,20 @@
         var det = document.createElement('a');
         det.className = 'crp-rel-detail';
         det.href = x.detailEl.href;
-        det.title = 'Abrir detalhes da tarefa/subprocesso';
-        det.setAttribute('role', 'button');
-        det.textContent = 'Ver detalhes';
-        det.addEventListener('click', function (e) {
-          e.preventDefault();
-          try { x.detailEl.click(); } catch (err) {}
-        });
+        if (x.detailNewTab) {
+          det.target = '_blank';
+          det.rel = 'noopener';
+          det.title = 'Abrir subprocesso em nova aba';
+          det.textContent = 'Abrir subprocesso';
+        } else {
+          det.title = 'Abrir detalhes da tarefa';
+          det.textContent = 'Ver detalhes';
+          det.setAttribute('role', 'button');
+          det.addEventListener('click', function (e) {
+            e.preventDefault();
+            try { x.detailEl.click(); } catch (err) {}
+          });
+        }
         li.appendChild(det);
       }
       if (REL.stepFilter === 'abertas' && !x.open) li.hidden = true;
