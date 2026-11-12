@@ -2310,8 +2310,16 @@
 
   function relWatch() {
     if (relObserver || relOff() || !relReadMode()) return;
-    relObserver = new MutationObserver(function () {
+    relObserver = new MutationObserver(function (muts) {
       if (relBusy) return;
+      // Mudanças dentro da própria camada (ex.: "Ver todos") não rebuildam.
+      var externo = false;
+      for (var i = 0; i < muts.length; i++) {
+        var t = muts[i].target;
+        var e = t && t.nodeType === 1 ? t : (t && t.parentElement);
+        if (!e || !e.closest || !e.closest('#crp-rel-steps, #crp-rel-open')) { externo = true; break; }
+      }
+      if (!externo) return;
       clearTimeout(relTimer);
       relTimer = setTimeout(relInit, 150);
     });
