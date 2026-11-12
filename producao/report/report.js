@@ -1415,7 +1415,35 @@
   function relReadMode() {
     if (!document.body || !document.body.classList.contains('pop')) return false;
     if (document.getElementById('containerRequest')) return false;
+    if (relEditMode()) return false;
     return !!(document.getElementById('PanelStep') && document.getElementById('PanelForm'));
+  }
+
+  /* Modo edição do Detalhamento: o próprio relatório vira formulário
+     ("Fechar edição", links "Reabrir" por tarefa, painel de atores). Nesse
+     contexto NÃO aplicamos a camada: as ações originais precisam aparecer. */
+  function relEditMode() {
+    var nav = document.querySelector('.title ul.nav');
+    if (nav && /fechar\s+edi[cç][aã]o/i.test(txt(nav))) return true;
+    if (document.getElementById('LkStepOpen')) return true;
+    var actors = document.getElementById('PanelFormActors');
+    if (actors && getComputedStyle(actors).display !== 'none') return true;
+    return false;
+  }
+
+  function relRestore() {
+    // Desfaz tudo que a camada fez, devolvendo a tela de edição do Zeev.
+    toArr(document.querySelectorAll('.crp-rel-bar, .crp-rel-banner, .crp-rel-highlights, .crp-rel-open, #crp-rel-steps, .crp-rel-footrow, .crp-rel-mult-note'))
+      .forEach(function (n) { n.remove(); });
+    toArr(document.querySelectorAll('.crp-rel-src-hidden')).forEach(function (n) {
+      n.classList.remove(REL.srcHidden);
+    });
+    toArr(document.querySelectorAll('.' + REL.hidden)).forEach(function (n) {
+      n.classList.remove(REL.hidden);
+    });
+    toArr(document.querySelectorAll('.crp-summary-card.crp-src-hidden')).forEach(function (n) {
+      n.classList.remove('crp-src-hidden');
+    });
   }
 
   function relSlug(s) {
@@ -2034,7 +2062,9 @@
   }
 
   function relInit() {
-    if (relOff() || !relReadMode() || relBusy) return;
+    if (relOff() || relBusy) return;
+    if (relEditMode()) { relRestore(); return; }
+    if (!relReadMode()) return;
     relBusy = true;
     if (relObserver) { relObserver.disconnect(); relObserver = null; }
     try {
