@@ -1588,3 +1588,13 @@ body.pop .crp-rel-sum-late{ background:#FFF1DC; color:#9A5B00; }
   body.pop .crp-rel-goto{ flex:1 1 auto; min-width:0; max-width:none; }
   body.pop .crp-rel-toggle{ flex:0 0 auto; }
 }
+/* Link de detalhes/subprocesso no passo a passo */
+body.pop .crp-rel-detail{
+  display:inline-flex; align-items:center; gap:6px; width:fit-content;
+  margin-top:8px; padding:5px 10px; border:1px solid var(--crp-border); border-radius:8px;
+  background:#fff; color:var(--crp-blue) !important; font-size:12px; font-weight:600;
+  text-decoration:none !important; cursor:pointer;
+}
+body.pop .crp-rel-detail::after{ content:"↗"; font-size:12px; line-height:1; }
+body.pop .crp-rel-detail:hover{ background:var(--crp-read); border-color:var(--crp-blue); }
+body.pop .crp-rel-detail:focus-visible{ outline:2px solid #1F3F8E; outline-offset:2px; }

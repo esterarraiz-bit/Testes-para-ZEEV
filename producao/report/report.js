@@ -2461,6 +2461,7 @@
       var terminal = /conclu|finaliz|cancel|reprov|recus|encerr|complet|aprovad|closed|done/i.test(stRaw);
       var open = !terminal;
       var endStamp = parseStamp(end);
+      var detailEl = tr.querySelector('a[href*="wfrel_tracker_form_detail"]') || tr.querySelector('td:last-child a[data-colorbox]') || null;
       return {
         task: title || taskText,
         desc: desc,
@@ -2473,6 +2474,7 @@
         email: email,
         people: people,
         executor: executor,
+        detailEl: detailEl,
         open: open,
         late: open && endStamp !== null && endStamp < Date.now()
       };
@@ -2767,6 +2769,19 @@
       var rb = relRespBlock(x);
       if (rb) li.appendChild(rb);
       if (x.desc) li.appendChild(relInstr(x.desc));
+      if (x.detailEl) {
+        var det = document.createElement('a');
+        det.className = 'crp-rel-detail';
+        det.href = x.detailEl.href;
+        det.title = 'Abrir detalhes da tarefa/subprocesso';
+        det.setAttribute('role', 'button');
+        det.textContent = 'Ver detalhes';
+        det.addEventListener('click', function (e) {
+          e.preventDefault();
+          try { x.detailEl.click(); } catch (err) {}
+        });
+        li.appendChild(det);
+      }
       if (REL.stepFilter === 'abertas' && !x.open) li.hidden = true;
       return li;
     }
