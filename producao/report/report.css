@@ -1306,3 +1306,6 @@ body.pop .crp-rel-people-list[hidden]{ display:none; }
 body.pop .crp-rel-people-row{ font-size:12px; color:var(--crp-muted); }
 body.pop .crp-rel-people-name{ color:var(--crp-text); }
 body.pop .crp-rel-people-det{ color:var(--crp-muted); }
+/* "Fluxo de origem" sem conteudo: iframe vazio nao deve aparecer */
+body.pop tr.crp-note:has(iframe[xname="inpfluxoOrigem"][src=""]),
+body.pop tr.crp-note:has(iframe[xname="inpfluxoOrigem"]:not([src])){ display:none !important; }
