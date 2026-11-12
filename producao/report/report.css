@@ -1454,7 +1454,7 @@ body.pop .crp-rel-busca-limpar{
   font-size:12px; font-weight:600; cursor:pointer;
 }
 body.pop .crp-rel-emptynote-show::before,
-body.pop .crp-rel-busca-limpar::before{ content:"· "; color:var(--crp-muted); }
+body.pop .crp-rel-busca-resumo .crp-rel-busca-limpar::before{ content:"· "; color:var(--crp-muted); }
 body.pop .crp-rel-emptynote-show:hover,
 body.pop .crp-rel-busca-limpar:hover{ text-decoration:underline; }
 body.pop .crp-rel-busca-resumo{
