@@ -1376,3 +1376,123 @@ body.pop #PanelForm table.form > tbody > tr > td.col1.crp-search-empty::after{
 }
 body.pop .crp-rel-search-input::-webkit-search-cancel-button,
 body.pop .crp-rel-search-input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none; display:none; }
+/* ---------- Barra de ferramentas unica (busca) ---------- */
+body.pop .crp-rel-bar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  width:100%; box-sizing:border-box; padding:8px;
+  background:#fff; border:1px solid #e1e6ef; border-radius:12px;
+  position:sticky; top:52px; z-index:25; margin:0 0 8px;
+  box-shadow:0 1px 2px rgba(5,63,136,.04);
+}
+body.pop .crp-rel-goto{
+  height:40px; min-width:260px; max-width:360px; flex:0 1 auto;
+  padding:0 32px 0 12px; border:1px solid #e1e6ef; border-radius:8px;
+  background-color:#fff; font-size:13px; text-overflow:ellipsis;
+}
+body.pop .crp-rel-search{
+  position:relative; display:flex; align-items:center;
+  flex:1 1 260px; min-width:180px; max-width:none; margin-left:0;
+}
+body.pop .crp-rel-search-input{
+  width:100%; height:40px; padding:0 12px 0 34px;
+  border:1px solid #e1e6ef; border-radius:8px; background:#fff;
+  font-size:13px; color:var(--crp-text);
+}
+body.pop .crp-rel-search.has-value .crp-rel-search-input{ padding-right:180px; }
+body.pop .crp-rel-search-ico{ left:11px; width:15px; height:15px; background:var(--crp-muted); }
+body.pop .crp-rel-search-hint{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  color:var(--crp-muted); font-size:11px; font-weight:600;
+  border:1px solid #e1e6ef; border-radius:5px; padding:1px 5px; background:#f8fafc;
+  pointer-events:none;
+}
+body.pop .crp-rel-search-hint[hidden]{ display:none; }
+body.pop .crp-rel-search-tools{
+  position:absolute; right:5px; top:50%; transform:translateY(-50%);
+  display:flex; align-items:center; gap:2px; background:#fff; padding-left:6px;
+}
+body.pop .crp-rel-search-tools[hidden]{ display:none; }
+body.pop .crp-rel-search-count{
+  color:var(--crp-muted); font-size:12px; white-space:nowrap;
+  max-width:120px; overflow:hidden; text-overflow:ellipsis;
+}
+body.pop .crp-rel-search-nav,
+body.pop .crp-rel-search-clear{
+  position:static; right:auto; top:auto; transform:none;
+  width:28px; height:28px; border:0; border-radius:6px; background:transparent;
+  color:var(--crp-blue); font-size:14px; line-height:1; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+}
+body.pop .crp-rel-search-nav:hover,
+body.pop .crp-rel-search-clear:hover{ background:#eef2f8; }
+body.pop .crp-rel-search-nav:disabled{ opacity:.4; cursor:default; background:transparent; }
+body.pop .crp-rel-search-clear{ color:var(--crp-muted); }
+body.pop .crp-rel-search.is-empty .crp-rel-search-input{ border-color:#a3232b; }
+body.pop .crp-rel-search.is-empty .crp-rel-search-count{ color:#a3232b; }
+body.pop .crp-rel-toggle{
+  height:40px; padding:0 12px; border:0; border-radius:8px; background:transparent;
+  color:var(--crp-blue); font-size:13px; font-weight:600; cursor:pointer;
+}
+body.pop .crp-rel-toggle:hover{ background:#eef2f8; }
+body.pop .crp-rel-toggle[aria-pressed="true"]{ background:var(--crp-read); color:var(--crp-blue); }
+
+/* Foco visivel */
+body.pop .crp-rel-bar :focus:not(:focus-visible){ outline:none; }
+body.pop .crp-rel-bar :focus-visible{ outline:2px solid #1F3F8E; outline-offset:2px; }
+body.pop .crp-rel-search-input:focus{ outline:none; border-color:#1F3F8E; }
+body.pop .crp-rel-search-input:focus-visible{ outline:2px solid #1F3F8E; outline-offset:2px; }
+
+/* Linhas de texto abaixo da barra */
+body.pop .crp-rel-emptynote{
+  display:flex; align-items:center; gap:6px; margin:0 0 8px; padding:0 2px;
+  color:var(--crp-muted); font-size:12px;
+}
+body.pop .crp-rel-emptynote[hidden]{ display:none; }
+body.pop .crp-rel-emptynote-show,
+body.pop .crp-rel-busca-limpar{
+  border:0; background:none; padding:0; color:var(--crp-blue);
+  font-size:12px; font-weight:600; cursor:pointer;
+}
+body.pop .crp-rel-emptynote-show::before,
+body.pop .crp-rel-busca-limpar::before{ content:"· "; color:var(--crp-muted); }
+body.pop .crp-rel-emptynote-show:hover,
+body.pop .crp-rel-busca-limpar:hover{ text-decoration:underline; }
+body.pop .crp-rel-busca-resumo{
+  display:flex; align-items:center; gap:8px; margin:0 0 8px; padding:0 2px;
+  color:var(--crp-muted); font-size:12px;
+}
+body.pop .crp-rel-busca-resumo[hidden]{ display:none; }
+
+/* Resultados da busca */
+body.pop #PanelForm tr.crp-busca-campo{ background:#FFF9DB; border-radius:8px; }
+body.pop #PanelForm tr.crp-busca-atual{ background:#FFE9A8; box-shadow:inset 3px 0 0 #D99A00; }
+body.pop #PanelForm tr.crp-busca-linha{ background:#FFF4C2; }
+body.pop #PanelForm table.form.crp-busca-secao{ box-shadow:inset 0 0 0 2px #F1D27A; }
+body.pop #PanelForm .crp-busca-fallback{ outline:2px dashed #F6A730; outline-offset:2px; border-radius:8px; }
+body.pop #PanelForm tr.crp-busca-campo,
+body.pop #PanelForm table.form.crp-busca-secao{ scroll-margin-top:var(--crp-busca-offset, 120px); }
+::highlight(crp-search){ background-color:#FFE08A; color:inherit; }
+@media screen{
+  body.pop.crp-searching .crp-rel-busca-oculto{ display:none !important; }
+  body.pop.crp-searching .crp-rel-emptynote{ display:none !important; }
+}
+@media (max-width:768px){
+  body.pop .crp-rel-search{ order:1; flex:1 1 100%; }
+  body.pop .crp-rel-goto{ order:2; flex:1 1 auto; min-width:0; }
+  body.pop .crp-rel-toggle{ order:3; flex:0 0 auto; }
+}
+@media print{
+  body.pop .crp-rel-emptynote,
+  body.pop .crp-rel-busca-resumo{ display:none !important; }
+  body.pop #PanelForm tr.crp-busca-campo,
+  body.pop #PanelForm tr.crp-busca-atual,
+  body.pop #PanelForm tr.crp-busca-linha,
+  body.pop #PanelForm table.form.crp-busca-secao{ background:none !important; box-shadow:none !important; outline:none !important; }
+}
+
+/* Contencao total do card (tabela de Equipamentos) */
+body.pop #PanelForm table.form{ overflow:clip; }
+body.pop #PanelForm .table-responsive{ max-width:100% !important; }
+body.pop .crp-rel-search-input,
+body.pop .crp-rel-goto,
+body.pop .crp-rel-toggle{ box-sizing:border-box; }

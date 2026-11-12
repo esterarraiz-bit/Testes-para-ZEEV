@@ -1438,7 +1438,7 @@
   function relRestore() {
     // Desfaz tudo que a camada fez, devolvendo a tela de edição do Zeev.
     relSearchClear(true);
-    toArr(document.querySelectorAll('.crp-rel-bar, .crp-rel-banner, .crp-rel-search-empty, .crp-rel-highlights, .crp-rel-open, #crp-rel-steps, .crp-rel-footrow, .crp-rel-mult-note'))
+    toArr(document.querySelectorAll('.crp-rel-bar, .crp-rel-banner, .crp-rel-emptynote, .crp-rel-busca-resumo, .crp-rel-search-empty, .crp-rel-highlights, .crp-rel-open, #crp-rel-steps, .crp-rel-footrow, .crp-rel-mult-note'))
       .forEach(function (n) { n.remove(); });
     toArr(document.querySelectorAll('.crp-rel-src-hidden')).forEach(function (n) {
       n.classList.remove(REL.srcHidden);
@@ -1668,7 +1668,7 @@
   /* ---------- Busca nos dados do formulário (aba Geral) ---------- */
   var relSearchState = {
     active: false, norm: '', raw: '', idx: -1, results: [], prev: null,
-    index: null, dirty: true, timer: 0, applying: false, ui: null
+    index: null, dirty: true, timer: 0, applying: false, ui: null, secCount: 0, printTerm: ''
   };
 
   function relNorm(s) {
@@ -1704,7 +1704,8 @@
           if (tds.length < 2) return;
           var label = txt(tds[0]);
           if (!label) return;
-          var value = txt(tds[1]);
+          var hiddenVals = toArr(tds[1].querySelectorAll('input')).map(function (i) { return i.value; }).filter(Boolean);
+          var value = txt(tds[1]) + ' ' + hiddenVals.join(' ');
           var files = toArr(tds[1].querySelectorAll('a')).map(function (a) { return txt(a); }).filter(Boolean);
           var tables = toArr(tds[1].querySelectorAll('table[mult="S"]')).map(function (mt) {
             var trows = mt.tBodies[0] ? toArr(mt.tBodies[0].children) : toArr(mt.querySelectorAll('tbody > tr'));
@@ -1721,7 +1722,7 @@
             nd: relDigits(value + ' ' + files.join(' '))
           });
         });
-        secs.push({ tbl: tbl, title: title, fields: fields });
+        secs.push({ tbl: tbl, title: title, titleNorm: relNorm(title), badge: tbl.querySelector('.crp-sec-count'), fields: fields });
       });
     }
     relSearchState.index = secs;
@@ -1730,20 +1731,26 @@
   }
 
   function relSearchClearMarks() {
-    toArr(document.querySelectorAll('.crp-search-hide, .crp-search-hit, .crp-search-current, .crp-search-fallback, .crp-search-empty')).forEach(function (n) {
+    toArr(document.querySelectorAll('.crp-rel-busca-oculto, .crp-busca-campo, .crp-busca-atual, .crp-busca-secao, .crp-busca-linha, .crp-search-empty, .crp-busca-fallback, .crp-search-hide, .crp-search-hit, .crp-search-current')).forEach(function (n) {
+      n.classList.remove('crp-rel-busca-oculto');
+      n.classList.remove('crp-busca-campo');
+      n.classList.remove('crp-busca-atual');
+      n.classList.remove('crp-busca-secao');
+      n.classList.remove('crp-busca-linha');
+      n.classList.remove('crp-search-empty');
+      n.classList.remove('crp-busca-fallback');
       n.classList.remove('crp-search-hide');
       n.classList.remove('crp-search-hit');
       n.classList.remove('crp-search-current');
-      n.classList.remove('crp-search-fallback');
-      n.classList.remove('crp-search-empty');
     });
-    toArr(document.querySelectorAll('.crp-rel-search-lines')).forEach(function (n) { n.remove(); });
-    toArr(document.querySelectorAll('#PanelForm tr.crp-rel-footrow')).forEach(function (tr) { tr.classList.remove('crp-search-hide'); });
+    toArr(document.querySelectorAll('.crp-sec-count[data-crp-orig]')).forEach(function (b) {
+      b.textContent = b.getAttribute('data-crp-orig');
+    });
   }
 
   function relSearchHighlightClear() {
     if (window.CSS && CSS.highlights) { try { CSS.highlights.delete('crp-search'); } catch (e) {} }
-    toArr(document.querySelectorAll('.crp-search-fallback')).forEach(function (n) { n.classList.remove('crp-search-fallback'); });
+    toArr(document.querySelectorAll('.crp-busca-fallback')).forEach(function (n) { n.classList.remove('crp-busca-fallback'); });
   }
 
   function relSearchTextNodes(root, term, ranges) {
@@ -1752,7 +1759,7 @@
       acceptNode: function (n) {
         if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
         var p = n.parentElement;
-        if (p && p.closest('script,style,noscript,.crp-search-hide')) return NodeFilter.FILTER_REJECT;
+        if (p && p.closest('script,style,noscript,.crp-rel-oculto')) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
       }
     });
@@ -1786,31 +1793,55 @@
     if (!relSearchState.results.length) return;
     var can = !!(window.CSS && CSS.highlights && window.Highlight);
     if (!can) {
-      relSearchState.results.forEach(function (f) { f.tr.classList.add('crp-search-fallback'); });
+      relSearchState.results.forEach(function (r) {
+        (r.kind === 'section' ? r.sec.tbl : r.field.tr).classList.add('crp-busca-fallback');
+      });
       return;
     }
     var ranges = [];
-    relSearchState.results.forEach(function (f) {
-      var before = ranges.length;
-      relSearchTextNodes(f.tdLabel, term, ranges);
-      relSearchTextNodes(f.tdVal, term, ranges);
-      if (ranges.length === before) f.tr.classList.add('crp-search-fallback');
+    (relSearchState.index || []).forEach(function (sec) {
+      if (sec.tbl.classList.contains('crp-rel-busca-oculto')) return;
+      relSearchTextNodes(sec.tbl, term, ranges);
     });
     if (ranges.length) { try { CSS.highlights.set('crp-search', new Highlight(...ranges)); } catch (e) {} }
+  }
+
+  function relSearchUpdateUI() {
+    var ui = relSearchState.ui;
+    if (!ui) return;
+    var n = relSearchState.results.length;
+    ui.count.textContent = n ? (relSearchState.idx + 1) + ' de ' + n : 'Nenhum resultado';
+    ui.count.title = 'em ' + (relSearchState.secCount || 0) + ' seções';
+    ui.box.classList.toggle('is-empty', n === 0);
+    ui.prev.disabled = !n;
+    ui.next.disabled = !n;
+    if (relSearchState.active) {
+      ui.resumo.hidden = false;
+      var raw = relSearchState.raw || '';
+      ui.resumoTxt.textContent = relSearchState.secCount
+        ? relSearchState.secCount + (relSearchState.secCount === 1 ? ' seção com ' : ' seções com ') + '"' + raw + '"'
+        : 'Nenhuma seção com "' + raw + '"';
+    } else {
+      ui.resumo.hidden = true;
+    }
+  }
+
+  function relSearchMarkCurrent() {
+    toArr(document.querySelectorAll('.crp-busca-atual')).forEach(function (n) { n.classList.remove('crp-busca-atual'); });
+    var r = relSearchState.results[relSearchState.idx];
+    if (r) (r.kind === 'section' ? r.sec.tbl : r.field.tr).classList.add('crp-busca-atual');
   }
 
   function relSearchNav(dir, silent) {
     if (!relSearchState.results.length) return;
     var n = relSearchState.results.length;
     relSearchState.idx = (relSearchState.idx + dir + n) % n;
-    var f = relSearchState.results[relSearchState.idx];
-    toArr(document.querySelectorAll('.crp-search-current')).forEach(function (x) { x.classList.remove('crp-search-current'); });
-    f.tr.classList.add('crp-search-current');
+    relSearchMarkCurrent();
+    relSearchUpdateUI();
     if (!silent) {
-      var bar = document.querySelector('.crp-rel-bar');
-      var off = (bar ? bar.getBoundingClientRect().bottom : 64) + 12;
-      var r = f.tr.getBoundingClientRect();
-      window.scrollTo({ top: Math.max(0, window.scrollY + r.top - off), behavior: 'smooth' });
+      var r = relSearchState.results[relSearchState.idx];
+      var alvo = r.kind === 'section' ? (r.sec.tbl.querySelector('tr.group > td') || r.sec.tbl) : r.field.tr;
+      alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
@@ -1821,6 +1852,11 @@
       relSearchClearMarks();
       document.body.classList.remove('crp-searching');
       var prev = relSearchState.prev;
+      if (prev && typeof prev.toggle === 'boolean') {
+        relSetMostrarVazios(prev.toggle);
+        var tg = document.getElementById('crp-rel-toggle');
+        if (tg) tg.setAttribute('aria-pressed', prev.toggle ? 'true' : 'false');
+      }
       if (prev && prev.collapsed) {
         prev.collapsed.forEach(function (t) {
           t.classList.add('crp-collapsed');
@@ -1834,27 +1870,44 @@
       relSearchState.idx = -1;
       relSearchState.norm = '';
       relSearchState.raw = '';
+      relSearchState.secCount = 0;
       if (typeof relAplicarVazios === 'function' && relSecoesAtuais && relSecoesAtuais.length) relAplicarVazios(relSecoesAtuais);
       relSearchHighlightClear();
       var ui = relSearchState.ui;
       if (ui) {
         if (!silent) ui.input.value = '';
-        ui.clear.hidden = !ui.input.value;
+        ui.box.classList.remove('has-value');
+        ui.box.classList.remove('is-empty');
+        ui.hint.hidden = !!ui.input.value;
+        ui.tools.hidden = !ui.input.value;
         ui.count.textContent = '';
-        ui.status.hidden = true;
-        ui.empty.hidden = true;
+        ui.count.title = '';
+        ui.prev.disabled = true;
+        ui.next.disabled = true;
+        ui.resumo.hidden = true;
       }
+      if (!silent && prev && typeof prev.scrollY === 'number') {
+        window.scrollTo(0, prev.scrollY);
+        requestAnimationFrame(function () { window.scrollTo(0, prev.scrollY); });
+        setTimeout(function () { window.scrollTo(0, prev.scrollY); }, 60);
+      }
+      if (typeof relBanner === 'function' && relSecoesAtuais) relBanner(relSecoesAtuais);
     } finally {
       setTimeout(function () { relSearchState.applying = false; }, 80);
     }
   }
 
   function relSearchShort() {
-    if (!relSearchState.active) return;
     var ui = relSearchState.ui;
     var v = ui ? ui.input.value : '';
-    relSearchClear(true);
-    if (ui) { ui.input.value = v; ui.clear.hidden = !v; }
+    if (relSearchState.active) relSearchClear(true);
+    if (ui) {
+      ui.input.value = v;
+      ui.box.classList.toggle('has-value', !!v);
+      ui.hint.hidden = !!v;
+      ui.tools.hidden = !v;
+      if (!v) { ui.count.textContent = ''; ui.count.title = ''; }
+    }
   }
 
   function relSearchApply(termNorm) {
@@ -1868,6 +1921,7 @@
         relSearchState.active = true;
         relSearchState.prev = {
           toggle: relMostrarVazios(),
+          scrollY: window.scrollY,
           collapsed: toArr(document.querySelectorAll('#PanelForm table.form.crp-collapsed'))
         };
         document.body.classList.add('crp-searching');
@@ -1875,83 +1929,69 @@
       if (typeof relAplicarVazios === 'function' && relSecoesAtuais && relSecoesAtuais.length) relAplicarVazios(relSecoesAtuais);
       if (relSearchState.dirty || !relSearchState.index) relSearchIndexBuild();
 
-      var termDigits = relDigits(termNorm);
-      var results = [], secCount = 0;
+      var digits = relDigits(termNorm);
       var raw = relSearchState.ui ? relSearchState.ui.input.value.trim() : termNorm;
       relSearchState.norm = termNorm;
       relSearchState.raw = raw;
+      var results = [], secCount = 0;
 
       (relSearchState.index || []).forEach(function (sec) {
-        var secHits = [];
+        var fieldHits = [];
         sec.fields.forEach(function (f) {
-          var valueHit = f.nv.indexOf(termNorm) >= 0 || (termDigits.length >= 3 && f.nd.indexOf(termDigits) >= 0);
+          var labelHit = f.nl.indexOf(termNorm) >= 0;
+          var valueHit = f.nv.indexOf(termNorm) >= 0 || (digits.length >= 3 && f.nd.indexOf(digits) >= 0);
           var fileHit = f.files.some(function (name) { return relNorm(name).indexOf(termNorm) >= 0; });
-          var tableHit = false;
+          var rowMatches = [];
           f.tables.forEach(function (t) {
-            t._hits = t.rows.filter(function (r) {
+            t.rows.forEach(function (r) {
               var rn = relNorm(r.text), rd = relDigits(r.text);
-              return rn.indexOf(termNorm) >= 0 || (termDigits.length >= 3 && rd.indexOf(termDigits) >= 0);
+              if (rn.indexOf(termNorm) >= 0 || (digits.length >= 3 && rd.indexOf(digits) >= 0)) rowMatches.push(r.tr);
             });
-            if (t._hits.length) tableHit = true;
           });
-          var ok = f.nl.indexOf(termNorm) >= 0 || valueHit || fileHit || tableHit;
-          if (!ok) {
-            f.tr.classList.add('crp-search-hide');
-            f.tr.classList.remove('crp-search-hit');
-            return;
-          }
-          f.tr.classList.remove('crp-search-hide');
-          f.tr.classList.add('crp-search-hit');
-          if (f.tr.getAttribute('data-crp-rel-empty') === '1') {
+          if (!(labelHit || valueHit || fileHit || rowMatches.length)) return;
+          f.tr.classList.add('crp-busca-campo');
+          rowMatches.forEach(function (tr) { tr.classList.add('crp-busca-linha'); });
+          if (f.tr.getAttribute('data-crp-rel-empty') === '1' && labelHit) {
             f.tr.classList.remove(REL.hidden);
             if (!f.tdVal.classList.contains('crp-val-empty') && !f.tdVal.querySelector('[data-crp-mask]')) {
               f.tdVal.classList.add('crp-search-empty');
             }
           }
-          f.tables.forEach(function (t) {
-            var hits = t._hits || [];
-            if (hits.length && hits.length < t.rows.length) {
-              t.rows.forEach(function (r) { r.tr.classList.toggle('crp-search-hide', hits.indexOf(r) < 0); });
-              var note = el('div', 'crp-rel-search-lines', hits.length + ' de ' + t.rows.length + ' linhas');
-              var wrap = t.tbl.closest('.table-responsive') || t.tbl;
-              if (wrap.parentNode) wrap.parentNode.insertBefore(note, wrap);
-            } else {
-              t.rows.forEach(function (r) { r.tr.classList.remove('crp-search-hide'); });
-            }
-          });
-          secHits.push(f);
+          fieldHits.push(f);
         });
-        if (secHits.length) {
-          sec.tbl.classList.remove('crp-search-hide');
-          secCount++;
-          results = results.concat(secHits);
-          if (sec.tbl.classList.contains('crp-collapsed')) {
-            sec.tbl.classList.remove('crp-collapsed');
-            var h = sec.tbl.querySelector('tr.group > td[data-crp-acc]') || sec.tbl.querySelector('tr.group > td');
-            if (h) h.setAttribute('aria-expanded', 'true');
-          }
-        } else {
-          sec.tbl.classList.add('crp-search-hide');
+        var titleHit = sec.titleNorm.indexOf(termNorm) >= 0;
+        var show = fieldHits.length > 0 || titleHit;
+        sec.tbl.classList.toggle('crp-rel-busca-oculto', !show);
+        if (!show) return;
+        secCount++;
+        if (sec.badge) {
+          if (!sec.badge.hasAttribute('data-crp-orig')) sec.badge.setAttribute('data-crp-orig', sec.badge.textContent);
+          var q = fieldHits.length || 1;
+          sec.badge.textContent = q + ' resultado' + (q === 1 ? '' : 's');
         }
+        if (sec.tbl.classList.contains('crp-collapsed')) {
+          sec.tbl.classList.remove('crp-collapsed');
+          var h = sec.tbl.querySelector('tr.group > td[data-crp-acc]') || sec.tbl.querySelector('tr.group > td');
+          if (h) h.setAttribute('aria-expanded', 'true');
+        }
+        if (titleHit && !fieldHits.length) sec.tbl.classList.add('crp-busca-secao');
+        fieldHits.forEach(function (f) {
+          results.push({ kind: 'field', sec: sec, field: f, el: f.tr });
+        });
+        if (titleHit && !fieldHits.length) results.push({ kind: 'section', sec: sec, el: sec.tbl });
       });
 
-      toArr(document.querySelectorAll('#PanelForm tr.crp-rel-footrow')).forEach(function (tr) { tr.classList.add('crp-search-hide'); });
-
+      relSearchState.secCount = secCount;
       relSearchState.results = results;
-      relSearchState.idx = -1;
-
-      var ui = relSearchState.ui;
-      if (ui) {
-        ui.status.hidden = false;
-        ui.count.textContent = results.length
-          ? results.length + (results.length === 1 ? ' resultado' : ' resultados') + ' em ' + secCount + (secCount === 1 ? ' seção' : ' seções')
-          : 'Nenhum resultado';
-        ui.empty.hidden = results.length > 0;
-        if (!results.length) ui.emptyTxt.textContent = 'Nenhum resultado para "' + raw + '".';
-        ui.up.disabled = !results.length;
-        ui.down.disabled = !results.length;
-      }
+      relSearchState.idx = results.length ? 0 : -1;
+      var note = document.getElementById('crp-rel-emptynote');
+      if (note) note.hidden = true;
+      relSearchMarkCurrent();
+      relSearchUpdateUI();
       relSearchHighlight(termNorm);
+      var bar = document.querySelector('.crp-rel-bar');
+      var off = bar ? Math.round(bar.offsetHeight + 64) : 96;
+      document.documentElement.style.setProperty('--crp-busca-offset', off + 'px');
     } finally {
       setTimeout(function () { relSearchState.applying = false; }, 80);
     }
@@ -1971,57 +2011,61 @@
     input.autocomplete = 'off';
     input.setAttribute('aria-label', 'Pesquisar nos dados do formulário');
     box.appendChild(input);
-    var clear = el('button', 'crp-rel-search-clear', '×');
-    clear.type = 'button';
-    clear.setAttribute('aria-label', 'Limpar pesquisa');
-    clear.hidden = true;
-    box.appendChild(clear);
-    var actsEl = bar.querySelector('.crp-rel-bar-actions');
-    bar.insertBefore(box, actsEl || null);
-
-    var status = el('div', 'crp-rel-search-status');
+    var hint = el('span', 'crp-rel-search-hint', 'Ctrl+K');
+    box.appendChild(hint);
+    var tools = el('div', 'crp-rel-search-tools');
+    tools.hidden = true;
     var count = el('span', 'crp-rel-search-count');
     count.setAttribute('aria-live', 'polite');
-    var up = el('button', 'crp-rel-search-btn', '↑');
-    up.type = 'button';
-    up.setAttribute('aria-label', 'Resultado anterior');
-    var down = el('button', 'crp-rel-search-btn', '↓');
-    down.type = 'button';
-    down.setAttribute('aria-label', 'Próximo resultado');
-    status.appendChild(count);
-    status.appendChild(up);
-    status.appendChild(down);
-    status.hidden = true;
-    bar.insertBefore(status, actsEl || null);
+    var prev = el('button', 'crp-rel-search-nav', '⌃');
+    prev.type = 'button';
+    prev.setAttribute('aria-label', 'Resultado anterior');
+    var next = el('button', 'crp-rel-search-nav', '⌄');
+    next.type = 'button';
+    next.setAttribute('aria-label', 'Próximo resultado');
+    var clear = el('button', 'crp-rel-search-clear', '✕');
+    clear.type = 'button';
+    clear.setAttribute('aria-label', 'Limpar pesquisa');
+    tools.appendChild(count);
+    tools.appendChild(prev);
+    tools.appendChild(next);
+    tools.appendChild(clear);
+    box.appendChild(tools);
+    bar.appendChild(box);
 
-    var empty = el('div', 'crp-rel-search-empty');
-    empty.hidden = true;
-    var emptyTxt = el('span', 'crp-rel-search-empty-txt');
-    empty.appendChild(emptyTxt);
-    var emptyBtn = el('button', 'crp-rel-search-empty-btn', 'Limpar pesquisa');
-    emptyBtn.type = 'button';
-    empty.appendChild(emptyBtn);
-    var banner = geral.querySelector('.crp-rel-banner');
-    geral.insertBefore(empty, banner ? banner.nextSibling : bar.nextSibling);
+    var resumo = el('div', 'crp-rel-busca-resumo');
+    resumo.hidden = true;
+    resumo.setAttribute('aria-live', 'polite');
+    var resumoTxt = el('span', 'crp-rel-busca-resumo-txt');
+    resumo.appendChild(resumoTxt);
+    var limpar = el('button', 'crp-rel-busca-limpar', 'Limpar pesquisa');
+    limpar.type = 'button';
+    resumo.appendChild(limpar);
+    var note = document.getElementById('crp-rel-emptynote');
+    if (note) geral.insertBefore(resumo, note.nextSibling);
+    else geral.insertBefore(resumo, bar.nextSibling);
 
-    relSearchState.ui = { input: input, clear: clear, count: count, up: up, down: down, status: status, empty: empty, emptyTxt: emptyTxt };
+    relSearchState.ui = { box: box, input: input, hint: hint, tools: tools, count: count, prev: prev, next: next, clear: clear, resumo: resumo, resumoTxt: resumoTxt };
 
     input.addEventListener('input', function () {
-      clear.hidden = !input.value;
+      var has = !!input.value;
+      box.classList.toggle('has-value', has);
+      hint.hidden = has;
+      tools.hidden = !has;
+      if (!has) { relSearchClear(); return; }
       var term = relNorm(input.value);
-      if (!term) { relSearchClear(); return; }
       if (term.length < 2) { relSearchShort(); return; }
       clearTimeout(relSearchState.timer);
       relSearchState.timer = setTimeout(function () { relSearchApply(term); }, 150);
     });
     input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); relSearchNav(e.shiftKey ? -1 : 1); }
-      else if (e.key === 'Escape') { e.preventDefault(); relSearchClear(); }
+      if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); relSearchNav(e.shiftKey ? -1 : 1); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); relSearchClear(); }
     });
-    clear.addEventListener('click', function () { relSearchClear(); });
-    up.addEventListener('click', function () { relSearchNav(-1); });
-    down.addEventListener('click', function () { relSearchNav(1); });
-    emptyBtn.addEventListener('click', function () { relSearchClear(); input.focus(); });
+    clear.addEventListener('click', function () { relSearchClear(); input.focus(); });
+    prev.addEventListener('click', function () { relSearchNav(-1); });
+    next.addEventListener('click', function () { relSearchNav(1); });
+    limpar.addEventListener('click', function () { relSearchClear(); input.focus(); });
 
     if (document.body.getAttribute('data-crp-search-keys') !== '1') {
       document.body.setAttribute('data-crp-search-keys', '1');
@@ -2051,6 +2095,26 @@
         }
       });
     }
+    if (document.body.getAttribute('data-crp-search-print') !== '1') {
+      document.body.setAttribute('data-crp-search-print', '1');
+      window.addEventListener('beforeprint', function () {
+        if (!relSearchState.active) return;
+        relSearchState.printTerm = relSearchState.raw;
+        relSearchClear(true);
+      });
+      window.addEventListener('afterprint', function () {
+        var t = relSearchState.printTerm;
+        if (!t) return;
+        relSearchState.printTerm = '';
+        if (relSearchState.ui) {
+          relSearchState.ui.input.value = t;
+          relSearchState.ui.box.classList.add('has-value');
+          relSearchState.ui.hint.hidden = true;
+          relSearchState.ui.tools.hidden = false;
+        }
+        relSearchApply(t);
+      });
+    }
   }
 
   function relBar() {
@@ -2059,92 +2123,85 @@
     var bar = geral.querySelector('.crp-rel-bar');
     if (bar) return bar;
     bar = el('div', 'crp-rel-bar');
-    var chips = el('div', 'crp-rel-chips');
-    chips.id = 'crp-rel-chips';
-    var acts = el('div', 'crp-rel-bar-actions');
+    bar.id = 'crp-rel-bar';
+
+    var sel = el('select', 'crp-rel-goto');
+    sel.id = 'crp-rel-goto';
+    sel.setAttribute('aria-label', 'Ir para seção');
+    sel.title = 'Ir para seção';
+    var first = document.createElement('option');
+    first.value = '';
+    first.textContent = 'Ir para seção';
+    sel.appendChild(first);
+    sel.addEventListener('change', function () {
+      var op = sel.options[sel.selectedIndex];
+      sel.title = op && op.value ? (op.title || op.textContent) : 'Ir para seção';
+      if (!sel.value) return;
+      var alvo = document.getElementById(sel.value);
+      if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      sel.value = '';
+    });
+    bar.appendChild(sel);
+    geral.insertBefore(bar, geral.firstChild);
+
+    var note = el('div', 'crp-rel-emptynote');
+    note.id = 'crp-rel-emptynote';
+    note.hidden = true;
+    var noteTxt = el('span', 'crp-rel-emptynote-text');
+    note.appendChild(noteTxt);
+    var show = el('button', 'crp-rel-emptynote-show', 'Mostrar');
+    show.type = 'button';
+    show.addEventListener('click', function () {
+      relSetMostrarVazios(true);
+      var t = document.getElementById('crp-rel-toggle');
+      if (t) t.setAttribute('aria-pressed', 'true');
+      relAplicarVazios(relSecoesAtuais);
+      if (relSearchState.active && relSearchState.norm) relSearchApply(relSearchState.norm);
+    });
+    note.appendChild(show);
+    geral.insertBefore(note, bar.nextSibling);
+
+    relSearchMount(bar, geral);
+
     var toggle = el('button', 'crp-rel-toggle');
     toggle.type = 'button';
     toggle.id = 'crp-rel-toggle';
     toggle.setAttribute('aria-pressed', relMostrarVazios() ? 'true' : 'false');
-    toggle.textContent = 'Mostrar campos vazios';
+    toggle.textContent = 'Campos vazios';
     toggle.addEventListener('click', function () {
       var v = !relMostrarVazios();
       relSetMostrarVazios(v);
       toggle.setAttribute('aria-pressed', v ? 'true' : 'false');
       relAplicarVazios(relSecoesAtuais);
+      if (relSearchState.active && relSearchState.norm) relSearchApply(relSearchState.norm);
     });
-    acts.appendChild(toggle);
-    bar.appendChild(chips);
-    bar.appendChild(acts);
-    geral.insertBefore(bar, geral.firstChild);
-
-    var banner = el('div', 'crp-rel-banner');
-    banner.hidden = true;
-    banner.appendChild(el('span', 'crp-rel-banner-text'));
-    var showAll = el('button', 'crp-rel-showall');
-    showAll.type = 'button';
-    showAll.textContent = 'Mostrar tudo';
-    showAll.addEventListener('click', function () {
-      relSetMostrarVazios(true);
-      var t = document.getElementById('crp-rel-toggle');
-      if (t) t.setAttribute('aria-pressed', 'true');
-      relAplicarVazios(relSecoesAtuais);
-    });
-    banner.appendChild(showAll);
-    geral.insertBefore(banner, bar.nextSibling);
-    relSearchMount(bar, geral);
+    bar.appendChild(toggle);
     return bar;
   }
 
   function relChips(secs) {
-    var box = document.getElementById('crp-rel-chips');
-    if (!box || !secs) return;
-    box.innerHTML = '';
+    var sel = document.getElementById('crp-rel-goto');
+    if (!sel || !secs) return;
+    var atual = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
     var visiveis = secs.filter(function (s) { return relMostrarVazios() ? true : !s.vazia; });
-    if (visiveis.length > 8) {
-      var lab = el('label', 'crp-rel-goto-label');
-      lab.appendChild(document.createTextNode('Ir para seção '));
-      var sel = el('select', 'crp-rel-goto');
-      sel.setAttribute('aria-label', 'Ir para seção');
-      sel.title = 'Ir para seção';
-      visiveis.forEach(function (s) {
-        var o = document.createElement('option');
-        o.value = s.anchorId;
-        o.textContent = s.title + ' (' + s.preenchidos + '/' + s.campos + ')';
-        o.title = s.title;
-        sel.appendChild(o);
-      });
-      sel.addEventListener('change', function () {
-        var op = sel.options[sel.selectedIndex];
-        sel.title = op ? op.textContent : 'Ir para seção';
-        var alvo = document.getElementById(sel.value);
-        if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-      lab.appendChild(sel);
-      box.appendChild(lab);
-      return;
-    }
     visiveis.forEach(function (s) {
-      var a = el('a', 'crp-rel-chip');
-      a.href = '#' + s.anchorId;
-      a.textContent = s.title + ' ' + s.preenchidos + '/' + s.campos;
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        var alvo = document.getElementById(s.anchorId);
-        if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-      box.appendChild(a);
+      var o = document.createElement('option');
+      o.value = s.anchorId;
+      o.textContent = s.title + ' (' + s.preenchidos + '/' + s.campos + ')';
+      o.title = s.title;
+      sel.appendChild(o);
     });
-    if (!box.children.length) box.appendChild(el('span', 'crp-rel-chip-empty', 'Nenhuma seção preenchida'));
+    if (atual) sel.value = atual;
   }
 
   function relBanner(secs) {
-    var banner = document.querySelector('.crp-rel-banner');
-    if (!banner || !secs) return;
+    var note = document.getElementById('crp-rel-emptynote');
+    if (!note || !secs) return;
     var n = secs.filter(function (s) { return s.vazia; }).length;
-    banner.hidden = n === 0 || relMostrarVazios();
-    var t = banner.querySelector('.crp-rel-banner-text');
-    if (t) t.textContent = n + (n === 1 ? ' seção sem dados está oculta' : ' seções sem dados estão ocultas');
+    note.hidden = n === 0 || relMostrarVazios() || relSearchState.active;
+    var t = note.querySelector('.crp-rel-emptynote-text');
+    if (t) t.textContent = n + (n === 1 ? ' seção vazia oculta' : ' seções vazias ocultas');
   }
 
   function relDestaques(secs) {
@@ -2722,7 +2779,7 @@
       for (var i = 0; i < muts.length; i++) {
         var t = muts[i].target;
         var e = t && t.nodeType === 1 ? t : (t && t.parentElement);
-        if (!e || !e.closest || !e.closest('#crp-rel-steps, #crp-rel-open')) { externo = true; break; }
+        if (!e || !e.closest || !e.closest('#crp-rel-steps, #crp-rel-open, .crp-rel-bar, .crp-rel-busca-resumo, .crp-rel-emptynote')) { externo = true; break; }
       }
       if (!externo) return;
       relSearchState.dirty = true;
