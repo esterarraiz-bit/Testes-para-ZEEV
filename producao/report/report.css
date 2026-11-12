@@ -1311,3 +1311,68 @@ body.pop .crp-rel-people-det{ color:var(--crp-muted); }
 /* "Fluxo de origem" sem conteudo: iframe vazio nao deve aparecer */
 body.pop tr.crp-note:has(iframe[xname="inpfluxoOrigem"][src=""]),
 body.pop tr.crp-note:has(iframe[xname="inpfluxoOrigem"]:not([src])){ display:none !important; }
+/* ---------- Busca nos dados do formulário (aba Geral) ---------- */
+body.pop .crp-rel-sr{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+body.pop .crp-rel-search{ position:relative; display:flex; align-items:center; flex:1 1 260px; min-width:200px; max-width:360px; margin-left:auto; }
+body.pop .crp-rel-search-ico{
+  position:absolute; left:11px; top:50%; transform:translateY(-50%); width:15px; height:15px;
+  background:var(--crp-muted); pointer-events:none;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+body.pop .crp-rel-search-input{
+  width:100%; height:36px; padding:0 32px 0 33px;
+  border:1px solid var(--crp-border); border-radius:999px; background:#fff;
+  color:var(--crp-text); font-size:13px;
+}
+body.pop .crp-rel-search-input:focus{ outline:2px solid rgba(5,63,136,.22); outline-offset:1px; border-color:var(--crp-blue); }
+body.pop .crp-rel-search-clear{
+  position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  width:24px; height:24px; border:0; border-radius:50%; background:var(--crp-read);
+  color:var(--crp-blue); font-size:16px; line-height:1; cursor:pointer;
+}
+body.pop .crp-rel-search-clear[hidden]{ display:none; }
+body.pop .crp-rel-search-status{ display:flex; align-items:center; gap:4px; }
+body.pop .crp-rel-search-status[hidden]{ display:none; }
+body.pop .crp-rel-search-count{ color:var(--crp-muted); font-size:11.5px; white-space:nowrap; }
+body.pop .crp-rel-search-btn{
+  width:28px; height:28px; border:1px solid var(--crp-border); border-radius:8px;
+  background:#fff; color:var(--crp-blue); cursor:pointer; font-size:13px;
+}
+body.pop .crp-rel-search-btn:hover{ background:var(--crp-read); border-color:var(--crp-blue); }
+body.pop .crp-rel-search-btn:disabled{ opacity:.45; cursor:default; }
+body.pop .crp-rel-search-empty{
+  margin:10px 0 0; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  border:1px solid var(--crp-border); border-radius:10px; background:#fff;
+  color:var(--crp-muted); font-size:12.5px;
+}
+body.pop .crp-rel-search-empty[hidden]{ display:none; }
+body.pop .crp-rel-search-empty-btn{ border:0; background:none; color:var(--crp-blue); font-weight:600; font-size:12.5px; cursor:pointer; padding:0; }
+body.pop .crp-rel-search-empty-btn:hover{ text-decoration:underline; }
+body.pop .crp-rel-search-lines{ color:var(--crp-muted); font-size:11.5px; margin:6px 0 4px; }
+body.pop .crp-search-current{ outline:2px solid var(--crp-blue); outline-offset:2px; border-radius:8px; }
+body.pop .crp-search-fallback{ outline:2px dashed #F6A730; outline-offset:2px; border-radius:8px; }
+::highlight(crp-search){ background-color:#FFE08A; color:inherit; }
+@media screen{
+  body.pop.crp-searching .crp-search-hide{ display:none !important; }
+}
+@media print{
+  body.pop .crp-rel-search,
+  body.pop .crp-rel-search-status,
+  body.pop .crp-rel-search-empty,
+  body.pop .crp-rel-search-lines{ display:none !important; }
+}
+
+/* "Ir para seção": largura mínima e nome completo no title */
+body.pop .crp-rel-goto{ min-width:240px; text-overflow:ellipsis; }
+
+/* Contenção do card (tabela de Equipamentos e afins) */
+body.pop #PanelForm table.form{ max-width:100%; box-sizing:border-box; }
+body.pop #PanelForm table.form > tbody > tr > td.col1{ min-width:0; max-width:100%; }
+body.pop #PanelForm table.form tr:has(table[mult="S"]) > td.col1{ overflow-x:auto; }
+/* Campo vazio cujo rótulo bate na busca: mostra "—" */
+body.pop #PanelForm table.form > tbody > tr > td.col1.crp-search-empty::after{
+  content:"—"; color:var(--crp-muted); font-size:15px; font-weight:400; font-style:italic;
+}
+body.pop .crp-rel-search-input::-webkit-search-cancel-button,
+body.pop .crp-rel-search-input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none; display:none; }
