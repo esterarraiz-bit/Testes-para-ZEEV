@@ -1265,3 +1265,22 @@ body.pop .crp-rel-open-empty{ color:var(--crp-muted); font-size:12px; }
   body.pop .crp-rel-bar{ top:0; }
   body.pop .crp-rel-footrow > td{ padding:4px 16px 12px !important; }
 }
+
+/* ---------- Tabelas: espacamento entre secoes + centralizacao ---------- */
+body.pop #PanelForm td:has(> table.form){ padding-bottom:20px !important; }
+body.pop #PanelForm td:has(> table.form.crp-rel-oculto){ display:none !important; }
+body.pop #PanelForm table.form.crp-rel-oculto,
+body.pop #PanelForm table.form > tbody > tr.crp-rel-oculto{ display:none !important; }
+body.pop #PanelForm .table-responsive:has(> table[mult="S"].crp-rel-oculto){ display:none !important; }
+body.pop #PanelForm .table-responsive:has(> table[mult="S"]){ max-width:1100px !important; width:100% !important; margin:18px auto 22px !important; }
+body.pop #PanelForm table[mult="S"]{
+  width:100% !important; max-width:1100px !important; margin:0 auto !important;
+  border:1px solid var(--crp-border) !important; border-radius:12px; overflow:hidden; background:#fff;
+}
+body.pop #PanelForm table[mult="S"] > tbody > tr.header > td,
+body.pop #PanelForm table[mult="S"] > thead > tr > td{
+  background:var(--crp-read) !important; color:var(--crp-blue) !important;
+  font-size:11px !important; text-transform:uppercase; letter-spacing:.04em;
+}
+body.pop #PanelForm table[mult="S"] > tbody > tr:not(.header) > td{ padding:10px 12px !important; }
+body.pop #PanelForm table[mult="S"] > tbody > tr:not(.header):hover > td{ background:#F7FAFF !important; }

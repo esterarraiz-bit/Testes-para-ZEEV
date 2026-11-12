@@ -1376,6 +1376,10 @@
     setTimeout(markEmptyValues, 1200);
     setTimeout(markEmptyValues, 2600);
     relInit();
+    // Reavalia depois que o Zeev preenche os valores assincronamente.
+    setTimeout(relInit, 800);
+    setTimeout(relInit, 1800);
+    setTimeout(relInit, 3200);
     return true;
   }
 
@@ -1588,8 +1592,12 @@
 
       var vazios = campos - preenchidos;
       var secVazia = campos > 0 && preenchidos === 0;
-      if (secVazia && !relZeevOculto(tbl)) tbl.setAttribute('data-crp-rel-empty', '1');
-      else tbl.removeAttribute('data-crp-rel-empty');
+      if (secVazia && !relZeevOculto(tbl)) {
+        tbl.setAttribute('data-crp-rel-empty', '1');
+      } else {
+        tbl.removeAttribute('data-crp-rel-empty');
+        tbl.classList.remove(REL.hidden);
+      }
 
       var badge = tbl.querySelector('.crp-sec-count');
       if (badge) badge.textContent = preenchidos + ' de ' + campos + ' preenchidos';
@@ -2084,7 +2092,8 @@
       clearTimeout(relTimer);
       relTimer = setTimeout(relInit, 150);
     });
-    relObserver.observe(document.body, { childList: true, subtree: true });
+    // characterData: o Zeev preenche valores por texto depois do load.
+    relObserver.observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
   function start() {
