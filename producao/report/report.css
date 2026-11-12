@@ -1598,3 +1598,6 @@ body.pop .crp-rel-detail{
 body.pop .crp-rel-detail::after{ content:"↗"; font-size:12px; line-height:1; }
 body.pop .crp-rel-detail:hover{ background:var(--crp-read); border-color:var(--crp-blue); }
 body.pop .crp-rel-detail:focus-visible{ outline:2px solid #1F3F8E; outline-offset:2px; }
+body.pop .crp-rel-tl-task-link{ color:var(--crp-blue) !important; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+body.pop .crp-rel-tl-task-link:hover{ color:#03336F !important; }
+body.pop .crp-rel-tl-task-link:focus-visible{ outline:2px solid #1F3F8E; outline-offset:2px; border-radius:4px; }

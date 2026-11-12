@@ -2753,7 +2753,22 @@
     function item(x) {
       var li = el('div', 'crp-rel-tl-item ' + (x.late ? 'atrasada' : x.status.cls));
       var top = el('div', 'crp-rel-tl-top');
-      top.appendChild(el('span', 'crp-rel-tl-task', x.task || '—'));
+      var taskEl = el('span', 'crp-rel-tl-task', x.task || '—');
+      if (x.detailEl) {
+        taskEl.classList.add('crp-rel-tl-task-link');
+        taskEl.title = 'Abrir detalhes da tarefa/subprocesso';
+        taskEl.setAttribute('role', 'link');
+        taskEl.tabIndex = 0;
+        var abrirDetalhe = function (e) {
+          if (e) e.preventDefault();
+          try { x.detailEl.click(); } catch (err) {}
+        };
+        taskEl.addEventListener('click', abrirDetalhe);
+        taskEl.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirDetalhe(); }
+        });
+      }
+      top.appendChild(taskEl);
       if (String(x.statusRaw || '').trim()) {
         top.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
       }
