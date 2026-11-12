@@ -1821,8 +1821,14 @@
       ui.resumoTxt.textContent = relSearchState.secCount
         ? relSearchState.secCount + (relSearchState.secCount === 1 ? ' seção com ' : ' seções com ') + '"' + raw + '"'
         : 'Nenhuma seção com "' + raw + '"';
+      if (ui.vazio) {
+        var sem = n === 0;
+        ui.vazio.hidden = !sem;
+        if (sem) ui.vazioTxt.textContent = 'Nenhum dado com "' + raw + '"';
+      }
     } else {
       ui.resumo.hidden = true;
+      if (ui.vazio) ui.vazio.hidden = true;
     }
   }
 
@@ -1885,6 +1891,7 @@
         ui.prev.disabled = true;
         ui.next.disabled = true;
         ui.resumo.hidden = true;
+        if (ui.vazio) ui.vazio.hidden = true;
       }
       if (!silent && prev && typeof prev.scrollY === 'number') {
         window.scrollTo(0, prev.scrollY);
@@ -2045,7 +2052,16 @@
     if (note) geral.insertBefore(resumo, note.nextSibling);
     else geral.insertBefore(resumo, bar.nextSibling);
 
-    relSearchState.ui = { box: box, input: input, hint: hint, tools: tools, count: count, prev: prev, next: next, clear: clear, resumo: resumo, resumoTxt: resumoTxt };
+    var vazio = el('div', 'crp-rel-busca-vazio');
+    vazio.hidden = true;
+    var vazioTxt = el('div', 'crp-rel-busca-vazio-txt');
+    vazio.appendChild(vazioTxt);
+    var vazioBtn = el('button', 'crp-rel-busca-limpar', 'Limpar pesquisa');
+    vazioBtn.type = 'button';
+    vazio.appendChild(vazioBtn);
+    geral.insertBefore(vazio, resumo.nextSibling);
+
+    relSearchState.ui = { box: box, input: input, hint: hint, tools: tools, count: count, prev: prev, next: next, clear: clear, resumo: resumo, resumoTxt: resumoTxt, vazio: vazio, vazioTxt: vazioTxt };
 
     input.addEventListener('input', function () {
       var has = !!input.value;
@@ -2066,6 +2082,7 @@
     prev.addEventListener('click', function () { relSearchNav(-1); });
     next.addEventListener('click', function () { relSearchNav(1); });
     limpar.addEventListener('click', function () { relSearchClear(); input.focus(); });
+    vazioBtn.addEventListener('click', function () { relSearchClear(); input.focus(); });
 
     if (document.body.getAttribute('data-crp-search-keys') !== '1') {
       document.body.setAttribute('data-crp-search-keys', '1');
@@ -2167,7 +2184,8 @@
     toggle.type = 'button';
     toggle.id = 'crp-rel-toggle';
     toggle.setAttribute('aria-pressed', relMostrarVazios() ? 'true' : 'false');
-    toggle.textContent = 'Campos vazios';
+    toggle.appendChild(el('span', 'crp-rel-switch'));
+    toggle.appendChild(el('span', 'crp-rel-toggle-txt', 'Campos vazios'));
     toggle.addEventListener('click', function () {
       var v = !relMostrarVazios();
       relSetMostrarVazios(v);
@@ -2716,6 +2734,42 @@
     }
   }
 
+  /* Campo eventualmente solto fora da seção (ex.: Cliente/Projeto de atuação)
+     volta para "Dados da Vaga"; linhas antes do cabeçalho viram conteúdo. */
+  function relAjustarCampos() {
+    var vaga = null;
+    toArr(document.querySelectorAll('#PanelForm table.form')).some(function (t) {
+      if (/Dados da Vaga/i.test(txt(t.querySelector('.crp-sec-label')))) { vaga = t; return true; }
+      return false;
+    });
+    if (vaga && vaga.tBodies[0]) {
+      var tb = vaga.tBodies[0];
+      var foot = tb.querySelector('tr.crp-rel-footrow');
+      toArr(document.querySelectorAll('tr')).forEach(function (tr) {
+        if (vaga.contains(tr)) return;
+        var lab = tr.querySelector('td.col0');
+        if (!lab) return;
+        if (!/Cliente\/Projeto de atuação/i.test(txt(lab))) return;
+        if (foot && foot.parentNode === tb) tb.insertBefore(tr, foot);
+        else tb.appendChild(tr);
+      });
+    }
+    toArr(document.querySelectorAll('#PanelForm table.form')).forEach(function (t) {
+      var tb = t.tBodies[0];
+      if (!tb) return;
+      var group = tb.querySelector(':scope > tr.group');
+      if (!group) return;
+      var antes = [];
+      for (var n = tb.firstElementChild; n && n !== group; n = n.nextElementSibling) {
+        if (n.tagName === 'TR' && !n.classList.contains('crp-note')) antes.push(n);
+      }
+      if (antes.length) {
+        var ref = group.nextSibling;
+        antes.forEach(function (r) { tb.insertBefore(r, ref); });
+      }
+    });
+  }
+
   var relSecoesAtuais = [];
   var relBusy = false;
   var relTimer = 0;
@@ -2736,6 +2790,7 @@
       n.classList.add('crp-src-hidden');
     });
 
+    relAjustarCampos();
     relBar();
     relSecoesAtuais = relSecoes();
     relAplicarVazios(relSecoesAtuais);

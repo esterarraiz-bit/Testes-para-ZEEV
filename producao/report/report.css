@@ -1496,3 +1496,46 @@ body.pop #PanelForm .table-responsive{ max-width:100% !important; }
 body.pop .crp-rel-search-input,
 body.pop .crp-rel-goto,
 body.pop .crp-rel-toggle{ box-sizing:border-box; }
+/* ---------- Correções: filtro por seção, toggle e destaques ---------- */
+@media screen{
+  body.pop.crp-searching #PanelForm table.form.crp-rel-busca-oculto,
+  body.pop.crp-searching #PanelForm td:has(> table.form.crp-rel-busca-oculto){ display:none !important; }
+}
+
+/* Toggle: switch antes do texto, sem corte */
+body.pop .crp-rel-toggle{
+  flex:0 0 auto; white-space:nowrap; gap:8px; padding:0 12px;
+}
+body.pop .crp-rel-toggle-txt{ white-space:nowrap; }
+body.pop .crp-rel-toggle::before,
+body.pop .crp-rel-toggle::after{ content:none !important; display:none !important; }
+body.pop .crp-rel-switch{
+  position:relative; flex:0 0 34px; width:34px; height:20px; border-radius:999px;
+  background:#CBD5E1; transition:background .15s ease;
+}
+body.pop .crp-rel-switch::after{
+  content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.2); transition:left .15s ease;
+}
+body.pop .crp-rel-toggle[aria-pressed="true"] .crp-rel-switch{ background:var(--crp-blue); }
+body.pop .crp-rel-toggle[aria-pressed="true"] .crp-rel-switch::after{ left:16px; }
+
+/* Estado vazio da busca */
+body.pop .crp-rel-busca-vazio{
+  margin:12px 0; padding:22px 18px; border:1px solid var(--crp-border); border-radius:12px;
+  background:#fff; display:flex; flex-direction:column; align-items:center; gap:8px;
+  text-align:center; color:var(--crp-muted); font-size:13px;
+}
+body.pop .crp-rel-busca-vazio[hidden]{ display:none; }
+body.pop .crp-rel-busca-vazio-txt{ color:var(--crp-text); font-size:14px; }
+
+/* Destaques: só o trecho em amarelo; campo com fundo suave */
+body.pop #PanelForm tr.crp-busca-campo{ background:#F5F8FE; border-radius:10px; }
+body.pop #PanelForm tr.crp-busca-atual{ background:#E7EFFC; outline:2px solid #1F3F8E; outline-offset:1px; border-radius:10px; box-shadow:none; }
+body.pop #PanelForm tr.crp-busca-linha{ background:transparent; }
+body.pop #PanelForm table.form.crp-busca-secao{ background:#F5F8FE; box-shadow:none; }
+body.pop #PanelForm table.form.crp-busca-atual{ background:#E7EFFC; outline:2px solid #1F3F8E; outline-offset:-2px; }
+@media print{
+  body.pop .crp-rel-busca-vazio{ display:none !important; }
+  body.pop #PanelForm table.form.crp-busca-atual{ background:none !important; outline:none !important; }
+}
