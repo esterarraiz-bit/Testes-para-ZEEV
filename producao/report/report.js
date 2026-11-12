@@ -1826,6 +1826,8 @@
       var email = '';
       var m = respRaw.match(/[\w.+-]+@[\w.-]+\.\w+/);
       if (m) email = m[0];
+      var people = relParsePeople(respCell, email);
+      var executor = relFindExecutor(respCell, people);
 
       // Título × instruções: o que vier depois da 1ª linha (ou em .task-desc)
       // é descrição recolhível. Critério genérico, sem nome de fluxo.
@@ -1859,6 +1861,8 @@
         status: relStatus(c(cols.status)),
         resp: respRaw,
         email: email,
+        people: people,
+        executor: executor,
         open: open,
         late: open && endStamp !== null && endStamp < Date.now()
       };
@@ -1896,26 +1900,203 @@
     return { name: before || s, cargo: after, empresa: empresa, email: email };
   }
 
-  function relRespBlock(x) {
-    var p = relParseResp(x.resp, x.email);
-    if (!p.name) return null;
-    var wrap = el('div', 'crp-rel-tl-resp');
-    var av = el('span', 'crp-rel-avatar', initials(p.name));
-    av.setAttribute('aria-hidden', 'true');
-    wrap.appendChild(av);
-    var box = el('div', 'crp-rel-resp-text');
-    var l1 = el('div', 'crp-rel-resp-line1');
-    var verb;
-    if (x.open) verb = 'Responsável: ';
-    else if (/aprov/i.test(x.statusRaw || '')) verb = 'Aprovada por ';
-    else verb = x.end ? ('Concluída em ' + x.end + ' por ') : 'Concluída por ';
-    l1.appendChild(document.createTextNode(verb));
-    l1.appendChild(el('span', 'crp-rel-resp-name', p.name));
-    box.appendChild(l1);
+  function relNoSec(s) {
+    return String(s || '').replace(/(\d{1,2}:\d{2}):\d{2}\b/g, '$1');
+  }
+
+  function relPersonFromUser(u) {
+    var nameEl = u.querySelector('.user-content strong, .user-content .inline') || u.querySelector('strong');
+    var name = nameEl ? txt(nameEl) : '';
+    var email = '';
+    var tails = [];
+    toArr(u.querySelectorAll('.user-content .small')).forEach(function (s) {
+      var t = txt(s);
+      if (!t) return;
+      var m = t.match(/[\w.+-]+@[\w.-]+\.\w+/);
+      if (m && !email) { email = m[0]; return; }
+      tails.push(t);
+    });
+    if (!name) {
+      var p = relParseResp(txt(u), email);
+      p.userid = u.getAttribute('userid') || '';
+      return p;
+    }
+    var tail = tails.join(' ').replace(/\s+/g, ' ').trim();
+    var cargo = '', empresa = '';
+    var em = tail.match(/\(([^)]+)\)\s*$/);
+    if (em) { empresa = em[1].trim(); tail = tail.slice(0, em.index).trim(); }
+    if (!empresa && /(S\.?\s*A\.?|LTDA|EIRELI)\s*$/i.test(tail)) { empresa = tail; tail = ''; }
+    cargo = tail;
+    return { name: name, cargo: cargo, empresa: empresa, email: email, userid: u.getAttribute('userid') || '' };
+  }
+
+  /* Plano B: um e-mail = uma pessoa; descarta iniciais soltas de avatar. */
+  function relPeopleFromText(raw) {
+    var s = String(raw || '').replace(/\s+/g, ' ').trim();
+    s = s.replace(/(^|\s)[A-Z]{2}(?=\s)/g, ' ');
+    var emails = s.match(/[\w.+-]+@[\w.-]+\.\w+/g) || [];
+    if (!emails.length) return [];
+    if (emails.length === 1) {
+      var p = relParseResp(s);
+      return p.name ? [p] : [];
+    }
+    var out = [];
+    var cursor = 0;
+    for (var i = 0; i < emails.length; i++) {
+      var email = emails[i];
+      var pos = s.indexOf(email, cursor);
+      if (pos < 0) continue;
+      var before = s.slice(cursor, pos).trim();
+      var nextPos = i + 1 < emails.length ? s.indexOf(emails[i + 1], pos + email.length) : s.length;
+      var after = s.slice(pos + email.length, nextPos).trim();
+      var k = before.lastIndexOf(')');
+      if (k >= 0) before = before.slice(k + 1).trim();
+      before = before.replace(/(^|\s)[A-Z]{2}(?=\s)/g, ' ').trim();
+      var cargo = after, empresa = '';
+      var em = after.match(/^(.*?)\(([^)]+)\)/);
+      if (em) { cargo = em[1].trim(); empresa = em[2].trim(); }
+      else if (/(S\.?\s*A\.?|LTDA|EIRELI)\s*$/i.test(after)) { empresa = after; cargo = ''; }
+      var cut = cargo.search(/\s[A-Z]{2}\s/);
+      if (cut > 0) cargo = cargo.slice(0, cut).trim();
+      if (before) out.push({ name: before, cargo: cargo, empresa: empresa, email: email, userid: '' });
+      cursor = pos + email.length;
+    }
+    return out;
+  }
+
+  /* Estrutura: um bloco .user por pessoa. Fallback pelo texto. */
+  function relParsePeople(respCell, emailHint) {
+    var people = [];
+    var seen = {};
+    var add = function (p) {
+      if (!p || !p.name) return;
+      var key = String(p.userid || '') + '|' + String(p.email || '').toLowerCase() + '|' + p.name.toLowerCase();
+      if (seen[key]) return;
+      seen[key] = 1;
+      people.push(p);
+    };
+    if (respCell) toArr(respCell.querySelectorAll('.user')).forEach(function (u) { add(relPersonFromUser(u)); });
+    if (!people.length) {
+      var textPeople = relPeopleFromText(respCell ? txt(respCell) : '');
+      if (textPeople.length) textPeople.forEach(add);
+      else {
+        var p = relParseResp(respCell ? txt(respCell) : '', emailHint);
+        if (p.name) add({ name: p.name, cargo: p.cargo, empresa: p.empresa, email: p.email || emailHint || '', userid: '' });
+      }
+    }
+    return people;
+  }
+
+  function relFindExecutor(respCell, people) {
+    if (!respCell || !people.length) return '';
+    var marked = toArr(respCell.querySelectorAll('.user')).find(function (u) {
+      return /(execut|done|conclu|finished|success)/i.test(String(u.className)) ||
+        /(execut|conclu|finaliz)/i.test(u.getAttribute('title') || '');
+    });
+    if (marked) {
+      var nameEl = marked.querySelector('.user-content strong, .user-content .inline') || marked.querySelector('strong');
+      if (nameEl) return txt(nameEl);
+    }
+    var m = txt(respCell).match(/conclu[íi]d[oa]\s+por\s+([^,;|]+)/i);
+    if (m) return m[1].trim();
+    return '';
+  }
+
+  function relCargoLine(box, p) {
     var l2 = [p.cargo, p.empresa].filter(Boolean).join(' · ');
     if (l2) box.appendChild(el('div', 'crp-rel-resp-line2', l2));
+  }
+
+  function relRespBlock(x) {
+    var people = (x.people || []).slice(0);
+    if (!people.length && x.resp) {
+      var one = relParseResp(x.resp, x.email);
+      if (one.name) people.push(one);
+    }
+    if (!people.length) return null;
+
+    var wrap = el('div', 'crp-rel-tl-resp');
+    var avs = el('div', 'crp-rel-avatars');
+    people.slice(0, 3).forEach(function (p) {
+      var av = el('span', 'crp-rel-avatar', initials(p.name));
+      av.setAttribute('aria-hidden', 'true');
+      if (p.email) av.title = p.email;
+      avs.appendChild(av);
+    });
+    if (people.length > 3) avs.appendChild(el('span', 'crp-rel-avatar crp-rel-avatar-more', '+' + (people.length - 3)));
+    wrap.appendChild(avs);
+
+    var box = el('div', 'crp-rel-resp-text');
+
+    if (x.open) {
+      if (people.length === 1) {
+        var lo1 = el('div', 'crp-rel-resp-line1');
+        lo1.appendChild(document.createTextNode('Responsável: '));
+        lo1.appendChild(el('span', 'crp-rel-resp-name', people[0].name));
+        box.appendChild(lo1);
+        relCargoLine(box, people[0]);
+      } else {
+        box.appendChild(el('div', 'crp-rel-resp-line1', 'e mais ' + (people.length - 1)));
+      }
+      wrap.appendChild(box);
+      return wrap;
+    }
+
+    var exec = x.executor || '';
+    var aprov = /aprov/i.test(x.statusRaw || '');
+    var verb;
+    if (exec) verb = aprov ? 'Aprovada por ' : (x.end ? 'Concluída em ' + relNoSec(x.end) + ' por ' : 'Concluída por ');
+    else if (people.length === 1) verb = aprov ? 'Aprovada por ' : (x.end ? 'Concluída em ' + relNoSec(x.end) + ' por ' : 'Concluída por ');
+    else verb = 'Responsáveis: ';
+
+    if (exec && people.length > 1) {
+      var lx = el('div', 'crp-rel-resp-line1');
+      lx.appendChild(document.createTextNode(verb));
+      lx.appendChild(el('span', 'crp-rel-resp-name', exec));
+      box.appendChild(lx);
+      var matched = people.filter(function (p) { return p.name.toLowerCase() === exec.toLowerCase(); }).length;
+      var outros = Math.max(people.length - Math.max(matched, 1), 0);
+      if (outros) box.appendChild(el('div', 'crp-rel-resp-line2', 'Atribuída também a ' + outros + ' pessoa' + (outros === 1 ? '' : 's')));
+    } else if (people.length === 1) {
+      var l1 = el('div', 'crp-rel-resp-line1');
+      l1.appendChild(document.createTextNode(verb));
+      l1.appendChild(el('span', 'crp-rel-resp-name', people[0].name));
+      box.appendChild(l1);
+      relCargoLine(box, people[0]);
+      if (people[0].email) wrap.title = people[0].email;
+    } else if (people.length === 2) {
+      var l2p = el('div', 'crp-rel-resp-line1');
+      l2p.appendChild(document.createTextNode('Responsáveis: '));
+      l2p.appendChild(el('span', 'crp-rel-resp-name', people[0].name));
+      l2p.appendChild(document.createTextNode(' e '));
+      l2p.appendChild(el('span', 'crp-rel-resp-name', people[1].name));
+      box.appendChild(l2p);
+    } else {
+      var lm = el('div', 'crp-rel-resp-line1');
+      lm.appendChild(document.createTextNode('Responsáveis: '));
+      lm.appendChild(el('span', 'crp-rel-resp-name', people[0].name));
+      lm.appendChild(document.createTextNode(' e mais ' + (people.length - 1)));
+      box.appendChild(lm);
+      var btn = el('button', 'crp-rel-people-more', 'Ver todos');
+      btn.type = 'button';
+      var list = el('div', 'crp-rel-people-list');
+      list.hidden = true;
+      people.forEach(function (p) {
+        var row = el('div', 'crp-rel-people-row');
+        row.appendChild(el('span', 'crp-rel-people-name', p.name));
+        var det = [p.cargo, p.empresa].filter(Boolean).join(' · ');
+        if (det) row.appendChild(el('span', 'crp-rel-people-det', ' · ' + det));
+        if (p.email) row.title = p.email;
+        list.appendChild(row);
+      });
+      btn.addEventListener('click', function () {
+        list.hidden = !list.hidden;
+        btn.textContent = list.hidden ? 'Ver todos' : 'Ocultar';
+      });
+      box.appendChild(btn);
+      box.appendChild(list);
+    }
     wrap.appendChild(box);
-    if (p.email) wrap.title = p.email;
     return wrap;
   }
 
@@ -1968,9 +2149,9 @@
       if (x.subtitle) li.appendChild(el('div', 'crp-rel-tl-sub', x.subtitle));
       var meta = el('div', 'crp-rel-tl-meta');
       if (x.open) {
-        if (parseStamp(x.end) !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + relPrazo(x.end)));
-      } else if (x.end && !(x.resp || x.email)) {
-        meta.appendChild(el('span', 'crp-rel-tl-conc', 'Concluído em ' + x.end));
+        if (parseStamp(x.end) !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + relPrazo(relNoSec(x.end))));
+      } else if (x.end && !(x.people && x.people.length)) {
+        meta.appendChild(el('span', 'crp-rel-tl-conc', 'Concluído em ' + relNoSec(x.end)));
       }
       if (meta.children.length) li.appendChild(meta);
       var rb = relRespBlock(x);
@@ -2058,7 +2239,7 @@
         li.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
       }
       if (x.subtitle) li.appendChild(el('div', 'crp-rel-open-sub', x.subtitle));
-      if (parseStamp(x.end) !== null) li.appendChild(el('span', 'crp-rel-open-prazo', 'Prazo: ' + relPrazo(x.end)));
+      if (parseStamp(x.end) !== null) li.appendChild(el('span', 'crp-rel-open-prazo', 'Prazo: ' + relPrazo(relNoSec(x.end))));
       var rb = relRespBlock(x);
       if (rb) { rb.classList.add('crp-rel-open-resp'); li.appendChild(rb); }
       if (x.desc) li.appendChild(relInstr(x.desc));

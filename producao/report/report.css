@@ -1295,3 +1295,15 @@ body.pop .crp-rel-open-sub{ flex:1 1 100%; color:var(--crp-muted); font-size:12p
 body.pop .crp-rel-open-resp{ margin-left:auto; align-items:flex-start; }
 body.pop .crp-rel-open .crp-rel-resp-line1{ font-size:11.5px; }
 body.pop .crp-rel-open .crp-rel-resp-line2{ font-size:11px; }
+/* ---------- Varios responsaveis ---------- */
+body.pop .crp-rel-avatars{ display:flex; align-items:center; flex:0 0 auto; }
+body.pop .crp-rel-avatars .crp-rel-avatar + .crp-rel-avatar{ margin-left:-7px; }
+body.pop .crp-rel-avatars .crp-rel-avatar{ box-shadow:0 0 0 2px #fff; }
+body.pop .crp-rel-avatar-more{ font-size:10px; font-weight:600; background:var(--crp-read); color:var(--crp-muted); }
+body.pop .crp-rel-people-more{ align-self:flex-start; margin-top:4px; padding:0; border:0; background:none; color:var(--crp-blue); font-size:12px; cursor:pointer; }
+body.pop .crp-rel-people-more:hover{ text-decoration:underline; }
+body.pop .crp-rel-people-list{ margin-top:6px; display:flex; flex-direction:column; gap:3px; }
+body.pop .crp-rel-people-list[hidden]{ display:none; }
+body.pop .crp-rel-people-row{ font-size:12px; color:var(--crp-muted); }
+body.pop .crp-rel-people-name{ color:var(--crp-text); }
+body.pop .crp-rel-people-det{ color:var(--crp-muted); }
