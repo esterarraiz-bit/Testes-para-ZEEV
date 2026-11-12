@@ -1539,3 +1539,6 @@ body.pop #PanelForm table.form.crp-busca-atual{ background:#E7EFFC; outline:2px 
   body.pop .crp-rel-busca-vazio{ display:none !important; }
   body.pop #PanelForm table.form.crp-busca-atual{ background:none !important; outline:none !important; }
 }
+@media screen{
+  body.pop.crp-searching #PanelForm .crp-rel-stray{ display:none !important; }
+}
