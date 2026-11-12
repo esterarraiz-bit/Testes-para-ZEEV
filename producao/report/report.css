@@ -827,12 +827,12 @@ body.pop #tblFile tbody{
   gap:16px; align-items:stretch;
 }
 body.pop #tblFile tbody > tr{
-  display:block !important; background:transparent !important;
+  display:block !important; height:100%; background:transparent !important;
   border:0 !important; border-radius:0 !important; padding:0 !important;
   box-shadow:none !important; transform:none !important;
 }
 body.pop #tblFile tbody > tr:hover{ border:0 !important; box-shadow:none !important; transform:none !important; }
-body.pop #tblFile tbody > tr > td.crp-file-cell{ display:block !important; width:100% !important; padding:0 !important; border:0 !important; background:transparent !important; }
+body.pop #tblFile tbody > tr > td.crp-file-cell{ display:block !important; width:100% !important; height:100% !important; box-sizing:border-box; padding:0 !important; border:0 !important; background:transparent !important; }
 body.pop #tblFile tbody > tr:has(.alert){ grid-column:1/-1; }
 
 body.pop .crp-file{
@@ -849,7 +849,7 @@ body.pop .crp-file:focus-within{ border-color:#1E3A8A; box-shadow:0 0 0 3px rgba
   body.pop .crp-file:hover{ transform:none; }
 }
 
-body.pop .crp-file-main{ display:flex; align-items:flex-start; gap:12px; }
+body.pop .crp-file-main{ display:flex; align-items:flex-start; gap:12px; min-width:0; }
 body.pop .crp-file-thumb{
   flex:0 0 48px; width:48px; height:48px; border-radius:12px; overflow:hidden;
   display:inline-flex; align-items:center; justify-content:center;
@@ -914,6 +914,7 @@ body.pop .crp-ic-tag{
 
 body.pop .crp-file-meta{
   display:flex; align-items:center; flex-wrap:wrap; gap:6px 12px;
+  min-width:0; max-width:100%; margin-top:auto;
   padding-top:12px; border-top:1px solid var(--crp-line);
   color:#64748B; font-size:12px; line-height:1.4;
 }
@@ -922,11 +923,12 @@ body.pop .crp-file-author{ max-width:100%; }
 body.pop .crp-file-author-txt{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
 body.pop .crp-file-meta .crp-file-ic{ width:13px; height:13px; flex:0 0 13px; }
 body.pop .crp-file-task{
-  display:inline-flex; align-items:center; gap:5px; max-width:100%; width:fit-content;
+  display:inline-flex; align-items:center; gap:5px; flex:0 1 auto; min-width:0;
+  max-width:100%; width:fit-content; overflow:hidden;
   padding:2px 8px; border:1px solid var(--crp-border); border-radius:999px;
   background:#F8FAFF; color:#475569; font-size:11px; font-weight:600;
 }
-body.pop .crp-file-task-txt{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+body.pop .crp-file-task-txt{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; max-width:100%; }
 body.pop .crp-file-task .crp-file-ic{ width:11px; height:11px; flex:0 0 11px; }
 
 /* contraste do botão de download */
