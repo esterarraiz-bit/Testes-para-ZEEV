@@ -1174,3 +1174,94 @@ body.pop .crp-bottom-bar-actions > li.crp-ab-cancel{ margin-right:auto; }
   body.pop .crp-rel-open-resp{ margin-left:0; flex-basis:100%; }
   body.pop .crp-rel-stepbtn,body.pop .crp-rel-toggle{ height:44px; }
 }
+
+/* ---------- Ajustes da repaginada (feedback do teste) ---------- */
+body.pop .crp-rel-footrow{ grid-column:1/-1 !important; display:block !important; }
+body.pop .crp-rel-footrow > td{
+  border:0 !important; padding:4px 20px 14px !important;
+  color:var(--crp-muted); font-size:11px; line-height:1.4;
+}
+body.pop .crp-rel-footrow[hidden]{ display:none !important; }
+
+/* Multivaloradas dentro da seção, sem recuo/limite de 70ch */
+body.pop #PanelForm table.form > tbody > tr:has(table[mult="S"]) > td.col1{ max-width:none !important; }
+body.pop #PanelForm table.form > tbody > tr:has(table[mult="S"]){ margin:0 -20px !important; }
+body.pop #PanelForm table.form > tbody > tr:has(table[mult="S"]) > td{ padding:0 20px !important; }
+body.pop #PanelForm table[mult="S"]{ width:100% !important; margin:0 !important; }
+body.pop #PanelForm .table-responsive{ margin:0 !important; }
+body.pop .crp-rel-mult-note{ padding:8px 10px; color:var(--crp-muted); font-size:12px; }
+
+/* Campos de arquivo no grid, com ícone */
+body.pop .crp-rel-file{ position:relative; display:flex; align-items:center; gap:8px; min-width:0; }
+body.pop .crp-rel-file::before{
+  content:""; flex:0 0 16px; width:16px; height:16px; background:var(--crp-blue);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.4 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* Toggle com cara de switch */
+body.pop .crp-rel-toggle{ position:relative; padding-left:46px; }
+body.pop .crp-rel-toggle::before{
+  content:""; position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:26px; height:15px; border-radius:999px; background:var(--crp-border);
+  transition:background-color .15s ease;
+}
+body.pop .crp-rel-toggle::after{
+  content:""; position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  width:11px; height:11px; border-radius:50%; background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.2); transition:left .15s ease;
+}
+body.pop .crp-rel-toggle[aria-pressed="true"]::before{ background:var(--crp-blue); }
+body.pop .crp-rel-toggle[aria-pressed="true"]::after{ left:25px; }
+
+/* "Ir para" quando há muitas seções */
+body.pop .crp-rel-goto-label{ display:inline-flex; align-items:center; gap:8px; color:var(--crp-muted); font-size:12px; font-weight:600; }
+body.pop .crp-rel-goto{
+  height:34px; max-width:340px; padding:0 30px 0 10px;
+  border:1px solid var(--crp-border); border-radius:var(--crp-radius-ctrl);
+  background-color:#fff; color:var(--crp-text); font-size:12.5px;
+  appearance:none; -webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23053F88' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 10px center; background-size:16px 16px;
+}
+/* Barra de filtros fixa junto das abas */
+body.pop .crp-rel-bar{
+  position:sticky; top:52px; z-index:25;
+  padding:8px 0; margin:0 0 10px;
+  background:rgba(243,246,251,.96); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+}
+
+/* Instruções recolhidas (timeline e tarefas abertas) */
+body.pop .crp-rel-instr{ margin-top:6px; }
+body.pop .crp-rel-instr-sum{
+  display:inline-flex; align-items:center; gap:6px;
+  color:var(--crp-blue); font-size:12px; font-weight:600; cursor:pointer;
+  list-style:none;
+}
+body.pop .crp-rel-instr-sum::-webkit-details-marker{ display:none; }
+body.pop .crp-rel-instr-sum::before{ content:"›"; font-size:14px; line-height:1; transition:transform .15s ease; }
+body.pop .crp-rel-instr[open] .crp-rel-instr-sum::before{ transform:rotate(90deg); }
+body.pop .crp-rel-instr-text{
+  margin-top:6px; padding:8px 12px; border-left:3px solid var(--crp-border);
+  background:var(--crp-bg); border-radius:0 8px 8px 0;
+  color:var(--crp-muted); font-size:12.5px; line-height:1.5; white-space:pre-line;
+}
+
+/* Concluídas recolhidas em listas grandes */
+body.pop .crp-rel-donebox{ margin-top:12px; border-top:1px solid var(--crp-line); padding-top:8px; }
+body.pop .crp-rel-donebox-sum{
+  display:inline-flex; align-items:center; gap:6px; color:var(--crp-blue);
+  font-size:12px; font-weight:600; cursor:pointer; list-style:none;
+}
+body.pop .crp-rel-donebox-sum::-webkit-details-marker{ display:none; }
+body.pop .crp-rel-donebox-sum::before{ content:"›"; transition:transform .15s ease; }
+body.pop .crp-rel-donebox[open] .crp-rel-donebox-sum::before{ transform:rotate(90deg); }
+
+/* Fatos do cabeçalho e estado vazio das tarefas */
+body.pop .crp-rel-facts{ flex:1 1 100%; color:var(--crp-muted); font-size:12px; margin-top:2px; }
+body.pop .crp-rel-open-empty{ color:var(--crp-muted); font-size:12px; }
+
+@media (max-width:640px){
+  body.pop .crp-rel-bar{ top:0; }
+  body.pop .crp-rel-footrow > td{ padding:4px 16px 12px !important; }
+}

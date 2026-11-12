@@ -35,7 +35,32 @@
     return s;
   }
 
-  function txt(node) { return node ? String(node.innerText || node.textContent || '').trim() : ''; }
+  /* Texto "DOM-aware": <br> e blocos viram quebra; nós filhos são unidos com
+     espaço (evita "21/10/202600:00:01" e "email(63) 9999..."). */
+  function txt(node) {
+    if (!node) return '';
+    var out = '';
+    var block = /^(ADDRESS|ARTICLE|ASIDE|BLOCKQUOTE|DIV|DL|DT|DD|FIELDSET|FIGCAPTION|FIGURE|FOOTER|FORM|H[1-6]|HEADER|HR|LI|MAIN|NAV|OL|P|PRE|SECTION|TABLE|TBODY|TD|TFOOT|TH|THEAD|TR|UL)$/;
+    (function walk(n) {
+      if (n.nodeType === 3) { out += n.nodeValue; return; }
+      if (n.nodeType !== 1) return;
+      var tag = n.tagName;
+      if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return;
+      if (tag === 'BR') { out += '\n'; return; }
+      var isBlock = block.test(tag);
+      if (isBlock) out += '\n';
+      toArr(n.childNodes).forEach(function (c, i) {
+        if (i > 0) {
+          var prev = n.childNodes[i - 1];
+          if (!/\s$/.test(out) && !(c.nodeType === 3 && /^\s/.test(c.nodeValue || ''))) out += ' ';
+          if (prev && prev.nodeType === 1 && c.nodeType === 1 && !/\s$/.test(out)) out += ' ';
+        }
+        walk(c);
+      });
+      if (isBlock) out += '\n';
+    })(node);
+    return out.replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{2,}/g, '\n').trim();
+  }
 
   function countRows(tableId) {
     var t = document.getElementById(tableId);
@@ -52,7 +77,9 @@
   function initials(name) {
     var parts = String(name || '').replace(/[()]/g, ' ').trim().split(/\s+/).filter(Boolean);
     if (!parts.length) return '?';
-    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+    // Regra única: primeira letra do primeiro + do último nome.
+    var last = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+    return (parts[0][0] + (last[0] || '')).toUpperCase();
   }
 
   function cardHeader(eyebrow, title, badge, iconKey) {
@@ -811,9 +838,11 @@
       rows.forEach(function (tr) {
         if (tr.classList.contains('group')) return;
         var tds = toArr(tr.children);
-        // linhas de texto/ajuda (célula única ou colspan) e campos largos em linha cheia
+        // Linhas de texto/ajuda (célula única/colspan), multivaloradas e
+        // textareas ocupam a linha inteira. Campos de arquivo ficam no grid
+        // normal (mesmo alinhamento dos demais).
         if (tds.length === 1 || tr.querySelector('td[colspan]') ||
-            tr.querySelector('table[mult="S"], .containerFormFileLink, [data-fieldformat="FILE"], textarea')) {
+            tr.querySelector('table[mult="S"], textarea')) {
           tr.classList.add('crp-full');
         }
         if (tds.length === 1) tr.classList.add('crp-note');
@@ -1527,25 +1556,60 @@
       var badge = tbl.querySelector('.crp-sec-count');
       if (badge) badge.textContent = preenchidos + ' de ' + campos + ' preenchidos';
 
-      var foot = tbl.querySelector('.crp-rel-sec-foot');
+      // Rodapé: uma única linha DENTRO da seção (tbody), nunca com 0.
+      var foot = tbl.querySelector('tr.crp-rel-footrow');
       if (!foot) {
-        foot = el('div', 'crp-rel-sec-foot');
-        if (tbl.parentNode) tbl.parentNode.insertBefore(foot, tbl.nextSibling);
+        foot = el('tr', 'crp-rel-footrow');
+        var ft = el('td');
+        ft.colSpan = 2;
+        foot.appendChild(ft);
+        var tb = tbl.tBodies[0];
+        if (tb) tb.appendChild(foot);
       }
-      foot.textContent = vazios + (vazios === 1 ? ' campo vazio oculto' : ' campos vazios ocultos');
-      if (secVazia) foot.setAttribute('data-crp-rel-empty', '1');
-      else foot.removeAttribute('data-crp-rel-empty');
+      foot.setAttribute('data-crp-rel-foot', '1');
+      foot.setAttribute('data-crp-rel-count', String(vazios));
+      if (foot.firstElementChild) {
+        foot.firstElementChild.textContent = vazios + (vazios === 1 ? ' campo vazio oculto' : ' campos vazios ocultos');
+      }
 
-      list.push({ tbl: tbl, title: title, slug: slug, anchorId: anchorId, campos: campos, preenchidos: preenchidos, vazia: secVazia, vazios: vazios, foot: foot });
+      // Multivaloradas: ficam na seção; sem registros, ocultas (ou "Nenhum item"
+      // quando o toggle de vazios está ligado).
+      toArr(tbl.querySelectorAll('table[mult="S"]')).forEach(function (m) {
+        var tem = toArr(m.querySelectorAll('tbody > tr')).some(function (tr) {
+          if (tr.classList.contains('header') || tr.classList.contains('template') || tr.hidden) return false;
+          if (getComputedStyle(tr).display === 'none') return false;
+          return !!txt(tr);
+        });
+        var note = m.parentNode && m.parentNode.querySelector('.crp-rel-mult-note');
+        if (tem) {
+          m.removeAttribute('data-crp-rel-empty');
+          m.classList.remove(REL.hidden);
+          if (note) note.remove();
+        } else {
+          m.setAttribute('data-crp-rel-empty', '1');
+          if (!note && m.parentNode) {
+            note = el('div', 'crp-rel-mult-note', 'Nenhum item');
+            note.setAttribute('data-crp-rel-empty', '1');
+            m.parentNode.insertBefore(note, m.nextSibling);
+          }
+        }
+      });
+
+      list.push({ tbl: tbl, title: title, slug: slug, anchorId: anchorId, campos: campos, preenchidos: preenchidos, vazia: secVazia, vazios: vazios });
     });
     return list;
   }
 
   function relAplicarVazios(secs) {
     var show = relMostrarVazios();
-    toArr(document.querySelectorAll('[data-crp-rel-empty="1"]')).forEach(function (n) {
+    toArr(document.querySelectorAll('[data-crp-rel-empty="1"]:not([data-crp-rel-foot])')).forEach(function (n) {
       if (n.hasAttribute('data-crp-rel-zeev-hidden')) return;
       n.classList.toggle(REL.hidden, !show);
+    });
+    // Rodapé "N vazios ocultos": só quando o toggle está DESLIGADO e há vazios.
+    toArr(document.querySelectorAll('[data-crp-rel-foot]')).forEach(function (f) {
+      var n = parseInt(f.getAttribute('data-crp-rel-count') || '0', 10);
+      f.hidden = show || !n;
     });
     // O "—" cinza dos vazios vem do marcador existente (crp-val-empty),
     // reavaliado após o Zeev preencher os valores.
@@ -1600,8 +1664,27 @@
     var box = document.getElementById('crp-rel-chips');
     if (!box || !secs) return;
     box.innerHTML = '';
-    secs.forEach(function (s) {
-      if (relMostrarVazios() ? false : s.vazia) return;
+    var visiveis = secs.filter(function (s) { return relMostrarVazios() ? true : !s.vazia; });
+    if (visiveis.length > 8) {
+      var lab = el('label', 'crp-rel-goto-label');
+      lab.appendChild(document.createTextNode('Ir para seção '));
+      var sel = el('select', 'crp-rel-goto');
+      sel.setAttribute('aria-label', 'Ir para seção');
+      visiveis.forEach(function (s) {
+        var o = document.createElement('option');
+        o.value = s.anchorId;
+        o.textContent = s.title + ' (' + s.preenchidos + '/' + s.campos + ')';
+        sel.appendChild(o);
+      });
+      sel.addEventListener('change', function () {
+        var alvo = document.getElementById(sel.value);
+        if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      lab.appendChild(sel);
+      box.appendChild(lab);
+      return;
+    }
+    visiveis.forEach(function (s) {
       var a = el('a', 'crp-rel-chip');
       a.href = '#' + s.anchorId;
       a.textContent = s.title + ' ' + s.preenchidos + '/' + s.campos;
@@ -1697,11 +1780,27 @@
       var m = txt(respCell).match(/[\w.+-]+@[\w.-]+\.\w+/);
       if (m) email = m[0];
       var resp = txt(respCell).replace(/^\s*[A-Z]{2}\s+/, '').replace(/[\w.+-]+@[\w.-]+\.\w+.*$/, '').trim();
+
+      // Título × instruções: o que vier depois da 1ª linha (ou em .task-desc)
+      // é descrição recolhível. Critério genérico, sem nome de fluxo.
+      var taskCell = tr.children[cols.task];
+      var taskText = txt(taskCell);
+      var descEl = taskCell && taskCell.querySelector('.task-desc');
+      var desc = descEl ? txt(descEl) : '';
+      var title = taskText;
+      if (desc) {
+        title = taskText.replace(desc, '').trim();
+      } else {
+        var lines = taskText.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+        if (lines.length > 1) { title = lines[0]; desc = lines.slice(1).join('\n'); }
+      }
+
       var end = c(cols.end);
       var open = /andamento|execu|atual/i.test(c(cols.status));
       var endStamp = parseStamp(end);
       return {
-        task: c(cols.task),
+        task: title || taskText,
+        desc: desc,
         start: c(cols.start),
         end: end,
         statusRaw: c(cols.status),
@@ -1718,6 +1817,13 @@
     var b = el('span', 'crp-rel-badge crp-rel-' + cls);
     b.textContent = text;
     return b;
+  }
+
+  // Prazo com hora 00:00/00:00:0x é data pura (evita "00:00:01").
+  function relPrazo(raw) {
+    var s = String(raw || '').trim();
+    var m = s.match(/^(.*?)\s+00:00(?::0\d)?$/);
+    return m ? m[1] : s;
   }
 
   function relSteps() {
@@ -1766,8 +1872,7 @@
       li.appendChild(top);
       var meta = el('div', 'crp-rel-tl-meta');
       if (x.open) {
-        var prazo = parseStamp(x.end);
-        if (prazo !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + x.end));
+        if (parseStamp(x.end) !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + relPrazo(x.end)));
       } else if (x.end) {
         meta.appendChild(el('span', 'crp-rel-tl-conc', 'Concluído em ' + x.end));
       }
@@ -1781,10 +1886,12 @@
         resp.appendChild(el('span', 'crp-rel-tl-respname', x.resp || x.email));
         li.appendChild(resp);
       }
+      if (x.desc) li.appendChild(relInstr(x.desc));
       if (REL.stepFilter === 'abertas' && !x.open) li.hidden = true;
       return li;
     }
 
+    var dones = outros;
     if (abertos.length > 1) {
       var grp = el('div', 'crp-rel-tl-group');
       grp.appendChild(el('div', 'crp-rel-tl-grouphead', 'Em paralelo · ' + abertos.length + ' tarefas'));
@@ -1793,8 +1900,25 @@
     } else {
       abertos.forEach(function (x) { list.appendChild(item(x)); });
     }
-    outros.forEach(function (x) { list.appendChild(item(x)); });
+
+    if (REL.stepFilter === 'abertas') {
+      // já nascem ocultas no item(); não renderiza as concluídas
+    } else if (data.length > 10 && dones.length) {
+      var det = el('details', 'crp-rel-donebox');
+      det.appendChild(el('summary', 'crp-rel-donebox-sum', 'Mostrar ' + dones.length + (dones.length === 1 ? ' tarefa concluída' : ' tarefas concluídas')));
+      dones.forEach(function (x) { det.appendChild(item(x)); });
+      list.appendChild(det);
+    } else {
+      dones.forEach(function (x) { list.appendChild(item(x)); });
+    }
     host.appendChild(list);
+  }
+
+  function relInstr(desc) {
+    var det = el('details', 'crp-rel-instr');
+    det.appendChild(el('summary', 'crp-rel-instr-sum', 'Ver instruções'));
+    det.appendChild(el('div', 'crp-rel-instr-text', desc));
+    return det;
   }
 
   function relOpenTasks() {
@@ -1810,13 +1934,24 @@
       req.parentNode.insertBefore(host, req.nextSibling);
     }
     host.innerHTML = '';
-    if (!abertas.length) { host.hidden = true; return; }
     host.hidden = false;
 
+    var snap = stepSnapshot();
+    var facts = '';
+    if (snap) {
+      facts = 'Situação: ' + (snap.status || '—') + ' · Última movimentação: ' + (snap.updated || '—');
+    }
+
     var head = el('div', 'crp-rel-open-head');
-    head.appendChild(el('h3', 'crp-rel-open-title', 'Tarefas abertas (' + abertas.length + ')'));
+    head.appendChild(el('h3', 'crp-rel-open-title', abertas.length ? ('Tarefas abertas (' + abertas.length + ')') : 'Tarefas abertas'));
     head.appendChild(el('span', 'crp-rel-open-badge', abertas.length + ' em aberto · ' + atrasadas.length + ' atrasada' + (atrasadas.length === 1 ? '' : 's')));
+    if (facts) head.appendChild(el('span', 'crp-rel-facts', facts));
     host.appendChild(head);
+
+    if (!abertas.length) {
+      host.appendChild(el('div', 'crp-rel-open-empty', 'Nenhuma tarefa aberta.'));
+      return;
+    }
 
     var lista = abertas.slice().sort(function (a, b) {
       if (a.late !== b.late) return a.late ? -1 : 1;
@@ -1831,13 +1966,14 @@
       var li = el('li', 'crp-rel-open-item');
       li.appendChild(el('span', 'crp-rel-open-task', x.task || '—'));
       li.appendChild(relBadge(x.late ? 'atrasada' : x.status.cls, x.late ? 'Atrasada' : x.status.label));
-      if (parseStamp(x.end) !== null) li.appendChild(el('span', 'crp-rel-open-prazo', 'Prazo: ' + x.end));
+      if (parseStamp(x.end) !== null) li.appendChild(el('span', 'crp-rel-open-prazo', 'Prazo: ' + relPrazo(x.end)));
       if (x.resp) {
         var r = el('span', 'crp-rel-open-resp');
         r.appendChild(el('span', 'crp-rel-avatar crp-rel-avatar-sm', initials(x.resp)));
         r.appendChild(el('span', 'crp-rel-open-respname', x.resp));
         li.appendChild(r);
       }
+      if (x.desc) li.appendChild(relInstr(x.desc));
       ul.appendChild(li);
     });
     host.appendChild(ul);
@@ -1867,6 +2003,18 @@
 
   function relBuild() {
     if (relOff() || !relReadMode()) return;
+
+    // Idempotência: remove rodapés/notas criados por nós antes de refazer.
+    toArr(document.querySelectorAll('.crp-rel-footrow, .crp-rel-sec-foot, .crp-rel-mult-note')).forEach(function (n) {
+      n.remove();
+    });
+
+    // "Informações principais" sai: situação/última movimentação vão para o
+    // cabeçalho, junto de Tarefas abertas.
+    toArr(document.querySelectorAll('.crp-summary-card')).forEach(function (n) {
+      n.classList.add('crp-src-hidden');
+    });
+
     relBar();
     relSecoesAtuais = relSecoes();
     relAplicarVazios(relSecoesAtuais);
