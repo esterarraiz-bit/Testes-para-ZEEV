@@ -2859,8 +2859,8 @@
           det.title = 'Abrir subprocesso em nova aba';
           det.textContent = 'Abrir subprocesso';
         } else {
-          det.title = 'Abrir detalhes da tarefa';
-          det.textContent = 'Ver detalhes';
+          det.title = 'Abrir histórico da tarefa';
+          det.textContent = 'Ver histórico';
           det.setAttribute('role', 'button');
           det.addEventListener('click', function (e) {
             e.preventDefault();
