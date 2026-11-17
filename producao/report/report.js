@@ -578,6 +578,16 @@
     var canceled = /^cancel/i.test(resultText);
     var obsEl = document.getElementById('Obs');
     var reason = obsEl ? txt(obsEl).replace(/\s+/g, ' ').trim() : '';
+    var cancelMatch = txt(alert).match(/Cancelad[oa]\s+por\s+(.+?)\s+em\s+(\d{2}\/\d{2}\/\d{4}(?:\s+\d{2}:\d{2}(?::\d{2})?)?)/i);
+    var canceledBy = cancelMatch ? cancelMatch[1].replace(/\s+/g, ' ').trim() : '';
+    var canceledAt = cancelMatch ? cancelMatch[2].trim() : '';
+    if (canceled && canceledAt) {
+      var cm = canceledAt.match(/(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+      if (cm) {
+        dateText = cm[1] + '/' + cm[2] + '/' + cm[3];
+        if (cm[4]) dateText += ' às ' + cm[4] + ':' + cm[5];
+      }
+    }
 
     alert.setAttribute('data-crp-done', '1');
     alert.classList.add('crp-done-card');
@@ -593,6 +603,12 @@
     body.appendChild(el('h3', 'crp-done-title', canceled ? 'Solicitação cancelada' : 'Solicitação concluída'));
 
     var meta = el('div', 'crp-done-meta');
+    if (canceled && canceledBy) {
+      var c = el('span', 'crp-done-meta-item');
+      c.appendChild(el('span', 'crp-done-meta-ic crp-done-ic-user'));
+      c.appendChild(document.createTextNode('Cancelada por ' + canceledBy));
+      meta.appendChild(c);
+    }
     if (dateText) {
       var d = el('span', 'crp-done-meta-item');
       d.appendChild(el('span', 'crp-done-meta-ic crp-done-ic-clock'));
