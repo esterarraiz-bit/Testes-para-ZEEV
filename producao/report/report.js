@@ -576,6 +576,8 @@
 
     var resultText = txt(result).replace(/\s+/g, ' ').trim();
     var canceled = /^cancel/i.test(resultText);
+    var obsEl = document.getElementById('Obs');
+    var reason = obsEl ? txt(obsEl).replace(/\s+/g, ' ').trim() : '';
 
     alert.setAttribute('data-crp-done', '1');
     alert.classList.add('crp-done-card');
@@ -604,6 +606,12 @@
       meta.appendChild(s);
     }
     if (meta.children.length) body.appendChild(meta);
+    if (canceled && reason) {
+      var box = el('div', 'crp-done-reason');
+      box.appendChild(el('span', 'crp-done-reason-label', 'Justificativa'));
+      box.appendChild(el('p', 'crp-done-reason-text', reason));
+      body.appendChild(box);
+    }
     alert.appendChild(body);
 
     var pill = el('span', 'crp-done-pill crp-kv-value crp-status-tag ' + (canceled ? 'crp-step-error' : 'crp-step-done'));
