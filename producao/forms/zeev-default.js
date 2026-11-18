@@ -2576,8 +2576,19 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.querySelector('.crp-reason-close').addEventListener('click', close);
     overlay.querySelector('.crp-reason-body').appendChild(box);
 
+    var pressedOutside = false;
+
+    overlay.addEventListener('pointerdown', function (event) {
+      pressedOutside = event.target === overlay;
+    });
+
+    overlay.addEventListener('pointercancel', function () {
+      pressedOutside = false;
+    });
+
     overlay.addEventListener('click', function (event) {
-      if (event.target === overlay) close();
+      if (event.target === overlay && pressedOutside) close();
+      pressedOutside = false;
     });
 
     document.body.appendChild(overlay);
