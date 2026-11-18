@@ -2796,8 +2796,8 @@
     var exec = x.executor || '';
     var aprov = /aprov/i.test(x.statusRaw || '');
     var verb;
-    if (exec) verb = aprov ? 'Aprovada por ' : (x.end ? 'Concluída em ' + relNoSec(x.end) + ' por ' : 'Concluída por ');
-    else if (people.length === 1) verb = aprov ? 'Aprovada por ' : (x.end ? 'Concluída em ' + relNoSec(x.end) + ' por ' : 'Concluída por ');
+    if (exec) verb = aprov ? 'Aprovada por ' : 'Concluída por ';
+    else if (people.length === 1) verb = aprov ? 'Aprovada por ' : 'Concluída por ';
     else verb = 'Responsáveis: ';
 
     if (exec && people.length > 1) {
@@ -2916,8 +2916,8 @@
         if (parseStamp(x.end) !== null) {
           meta.appendChild(relMetaItem('prazo', 'Prazo', relPrazo(relNoSec(x.end))));
         }
-      } else if (x.end && !(x.people && x.people.length)) {
-        meta.appendChild(relMetaItem('conc', 'Concluída em', relNoSec(x.end)));
+      } else if (x.end) {
+        meta.appendChild(relMetaItem('conc', 'Concluída em', relPrazo(relNoSec(x.end))));
       }
       if (meta.children.length) li.appendChild(meta);
       var rb = relRespBlock(x);
