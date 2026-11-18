@@ -2336,3 +2336,104 @@ document.addEventListener('DOMContentLoaded', () => {
     attributeFilter: ['src']
   });
 })();
+
+(function () {
+  'use strict';
+
+  if (window.__crpConfirmAction) return;
+  window.__crpConfirmAction = true;
+
+  var lastAction = null;
+  var maxAge = 5000;
+
+  function actionFor(button) {
+    var label = (button.textContent || '').replace(/\s+/g, ' ').trim().toLowerCase();
+    var id = button.id || '';
+
+    if (/revis/.test(label)) {
+      return {
+        title: 'Solicitar revisão',
+        message: 'Tem certeza que deseja solicitar revisão desta tarefa?',
+        confirm: 'Solicitar revisão'
+      };
+    }
+
+    if (/reprov|rejeit/.test(label)) {
+      return {
+        title: 'Reprovar tarefa',
+        message: 'Tem certeza que deseja reprovar esta tarefa?',
+        confirm: 'Reprovar'
+      };
+    }
+
+    if (/aprov/.test(label)) {
+      return {
+        title: 'Aprovar tarefa',
+        message: 'Tem certeza que deseja aprovar esta tarefa?',
+        confirm: 'Aprovar'
+      };
+    }
+
+    if (/conclu|finaliz/.test(label) || id === 'btnFinish') {
+      return {
+        title: 'Concluir tarefa',
+        message: 'Tem certeza que deseja concluir esta tarefa?',
+        confirm: 'Concluir'
+      };
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target && event.target.closest
+      ? event.target.closest('button')
+      : null;
+
+    if (!button) return;
+
+    var action = actionFor(button);
+
+    if (action) {
+      lastAction = {
+        action: action,
+        time: Date.now()
+      };
+    }
+  }, true);
+
+  function apply() {
+    var dialog = document.querySelector('.cryo-confirm-dialog');
+
+    if (!dialog || !lastAction || Date.now() - lastAction.time > maxAge) {
+      return;
+    }
+
+    var title = dialog.querySelector('.modal-header h3, .modal-header h2, h3, h2');
+    var body = dialog.querySelector('.modal-body');
+    var confirm = dialog.querySelector('.modal-footer .btn-primary') ||
+      dialog.querySelector('.btn-primary');
+
+    if (!confirm) return;
+
+    if (title) title.textContent = lastAction.action.title;
+    if (body) body.textContent = lastAction.action.message;
+    confirm.textContent = lastAction.action.confirm;
+
+    lastAction = null;
+  }
+
+  function start() {
+    apply();
+    new MutationObserver(apply).observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
