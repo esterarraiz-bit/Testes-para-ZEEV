@@ -2868,6 +2868,9 @@
       li.appendChild(top);
       if (x.subtitle) li.appendChild(el('div', 'crp-rel-tl-sub', x.subtitle));
       var meta = el('div', 'crp-rel-tl-meta');
+      if (String(x.start || '').trim()) {
+        meta.appendChild(el('span', 'crp-rel-tl-start', 'Aberta em ' + relNoSec(x.start)));
+      }
       if (x.open) {
         if (parseStamp(x.end) !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + relPrazo(relNoSec(x.end))));
       } else if (x.end && !(x.people && x.people.length)) {
