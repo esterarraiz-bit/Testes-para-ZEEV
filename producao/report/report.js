@@ -2552,6 +2552,13 @@
     return b;
   }
 
+  function relMetaItem(kind, label, value) {
+    var item = el('span', 'crp-rel-tl-meta-item crp-rel-tl-' + kind);
+    item.appendChild(el('span', 'crp-rel-tl-meta-label', label));
+    item.appendChild(el('span', 'crp-rel-tl-meta-value', value));
+    return item;
+  }
+
   // Prazo com hora 00:00/00:00:0x é data pura (evita "00:00:01").
   function relPrazo(raw) {
     var s = String(raw || '').trim();
@@ -2869,12 +2876,14 @@
       if (x.subtitle) li.appendChild(el('div', 'crp-rel-tl-sub', x.subtitle));
       var meta = el('div', 'crp-rel-tl-meta');
       if (String(x.start || '').trim()) {
-        meta.appendChild(el('span', 'crp-rel-tl-start', 'Aberta em ' + relNoSec(x.start)));
+        meta.appendChild(relMetaItem('start', 'Aberta em', relNoSec(x.start)));
       }
       if (x.open) {
-        if (parseStamp(x.end) !== null) meta.appendChild(el('span', 'crp-rel-tl-prazo', 'Prazo: ' + relPrazo(relNoSec(x.end))));
+        if (parseStamp(x.end) !== null) {
+          meta.appendChild(relMetaItem('prazo', 'Prazo', relPrazo(relNoSec(x.end))));
+        }
       } else if (x.end && !(x.people && x.people.length)) {
-        meta.appendChild(el('span', 'crp-rel-tl-conc', 'Concluído em ' + relNoSec(x.end)));
+        meta.appendChild(relMetaItem('conc', 'Concluída em', relNoSec(x.end)));
       }
       if (meta.children.length) li.appendChild(meta);
       var rb = relRespBlock(x);
