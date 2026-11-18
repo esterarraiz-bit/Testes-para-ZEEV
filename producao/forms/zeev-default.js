@@ -2362,7 +2362,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (/aprov/.test(text)) return 'Justificativa para aprovação';
     if (/conclu|finaliz/.test(text)) return 'Justificativa para conclusão';
 
-    return 'Justificativa';
+    var action = clean(label)
+      .replace(/\s*\.{3,}\s*$/, '')
+      .replace(/\s*…\s*$/, '');
+
+    return action ? 'Justificativa para ' + action : 'Justificativa';
   }
 
   function keyFor(button, label) {
@@ -2620,17 +2624,25 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', function (event) {
     var button = event.target.closest && event.target.closest('button');
     if (!button) return;
-    if (button.closest('.crp-reason-overlay')) return;
+    if (button.closest('.crp-reason-overlay, #BoxForceInputReason, #BoxRejection, #BoxNotConclude')) return;
 
-    var label = clean(button.textContent);
-    if (/(revis|reprov|rejeit|aprov|conclu|finaliz|justific)/i.test(label)) {
-      lastAction = {
-        label: label,
-        key: keyFor(button, label),
-        tone: toneFor(button, label),
-        time: Date.now()
-      };
-    }
+    var label = clean(button.textContent)
+      .replace(/\s*\.{3,}\s*$/, '')
+      .replace(/\s*…\s*$/, '');
+    var onclick = button.getAttribute('onclick') || '';
+    var isAction = /doActionNotValidate|reject\(|approve\(|notConclude\(/i.test(onclick) ||
+      button.id === 'btnFinish' ||
+      /^customBtn_/i.test(button.id) ||
+      /(revis|reprov|rejeit|aprov|conclu|finaliz|justific)/i.test(label);
+
+    if (!isAction) return;
+
+    lastAction = {
+      label: label,
+      key: keyFor(button, label),
+      tone: toneFor(button, label),
+      time: Date.now()
+    };
   }, true);
 
   document.addEventListener('keydown', function (event) {
