@@ -1139,6 +1139,7 @@ body.pop .crp-rel-avatar{
   background:var(--crp-read); color:var(--crp-blue); font-size:10px; font-weight:700;
 }
 body.pop .crp-rel-avatar-sm{ flex-basis:22px; width:22px; height:22px; font-size:9px; }
+body.pop .crp-avatar-photo{ background-size:cover; background-position:center; background-repeat:no-repeat; color:transparent; }
 
 /* Timeline do passo a passo */
 body.pop .crp-rel-steps{ margin:0 0 14px; }
