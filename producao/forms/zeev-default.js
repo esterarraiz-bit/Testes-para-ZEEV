@@ -2336,3 +2336,144 @@ document.addEventListener('DOMContentLoaded', () => {
     attributeFilter: ['src']
   });
 })();
+
+(function () {
+  'use strict';
+
+  if (window.__crpReasonModal) return;
+  window.__crpReasonModal = true;
+
+  var boxes = ['BoxForceInputReason', 'BoxRejection', 'BoxNotConclude'];
+  var lastLabel = '';
+  var overlay = null;
+  var activeBox = null;
+  var original = null;
+
+  function clean(text) {
+    return (text || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function titleFor(label) {
+    var text = (label || '').toLowerCase();
+
+    if (/revis/.test(text)) return 'Justificativa para solicitar revisão';
+    if (/reprov|rejeit/.test(text)) return 'Justificativa para reprovação';
+    if (/aprov/.test(text)) return 'Justificativa para aprovação';
+    if (/conclu|finaliz/.test(text)) return 'Justificativa para conclusão';
+
+    return 'Justificativa';
+  }
+
+  function visibleBox() {
+    for (var i = 0; i < boxes.length; i++) {
+      var box = document.getElementById(boxes[i]);
+      if (box && box.offsetWidth && box.offsetHeight) return box;
+    }
+    return null;
+  }
+
+  function close() {
+    if (!overlay) return;
+
+    if (activeBox) {
+      activeBox.style.display = 'none';
+      if (original && original.parent && original.parent.isConnected) {
+        original.parent.insertBefore(activeBox, original.next);
+      }
+    }
+
+    overlay.remove();
+    overlay = null;
+    activeBox = null;
+    original = null;
+    document.body.classList.remove('crp-reason-open');
+  }
+
+  function bindConfirm(box) {
+    if (box.__crpReasonBound) return;
+    box.__crpReasonBound = true;
+
+    box.addEventListener('click', function (event) {
+      var button = event.target.closest && event.target.closest('button');
+      if (!button) return;
+      if (button.id !== 'BtnConfirmReason' && !/confirmar/i.test(button.textContent || '')) return;
+
+      var field = box.querySelector('textarea');
+      if (field && !field.value.trim()) return;
+
+      window.setTimeout(close, 80);
+    });
+  }
+
+  function open(box) {
+    if (overlay) return;
+
+    activeBox = box;
+    original = {
+      parent: box.parentNode,
+      next: box.nextSibling
+    };
+
+    overlay = document.createElement('div');
+    overlay.className = 'crp-reason-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.innerHTML =
+      '<div class="crp-reason-modal">' +
+        '<div class="crp-reason-head">' +
+          '<h3 class="crp-reason-title"></h3>' +
+          '<button type="button" class="crp-reason-close" aria-label="Fechar">×</button>' +
+        '</div>' +
+        '<div class="crp-reason-body"></div>' +
+      '</div>';
+
+    overlay.querySelector('.crp-reason-title').textContent = titleFor(lastLabel);
+    overlay.querySelector('.crp-reason-close').addEventListener('click', close);
+    overlay.querySelector('.crp-reason-body').appendChild(box);
+
+    document.body.appendChild(overlay);
+    document.body.classList.add('crp-reason-open');
+
+    bindConfirm(box);
+
+    var field = box.querySelector('textarea');
+    if (field) window.setTimeout(function () { field.focus(); }, 40);
+  }
+
+  function sync() {
+    var box = visibleBox();
+
+    if (box && !overlay) {
+      open(box);
+    } else if (!box && overlay) {
+      close();
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest && event.target.closest('button');
+    if (!button) return;
+    if (button.closest('.crp-reason-overlay')) return;
+
+    var label = clean(button.textContent);
+    if (/(revis|reprov|rejeit|aprov|conclu|finaliz|justific)/i.test(label)) {
+      lastLabel = label;
+    }
+  }, true);
+
+  function start() {
+    sync();
+    new MutationObserver(sync).observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();

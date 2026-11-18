@@ -5239,3 +5239,121 @@ select.crp-select-aberto {
   background: #18326F !important;
   border-color: #18326F !important;
 }
+
+.crp-reason-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.48);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.crp-reason-modal {
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+}
+
+.crp-reason-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 22px 0;
+}
+
+.crp-reason-title {
+  flex: 1;
+  margin: 0;
+  color: #1F3F8E;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.crp-reason-close {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5B6B8C;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.crp-reason-close:hover,
+.crp-reason-close:focus-visible {
+  background: #EEF2FA;
+  color: #1F3F8E;
+}
+
+.crp-reason-body {
+  padding: 16px 22px 22px;
+}
+
+.crp-reason-body #BoxForceInputReason,
+.crp-reason-body #BoxRejection,
+.crp-reason-body #BoxNotConclude {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.crp-reason-body #BoxForceInputReason > p,
+.crp-reason-body #BoxRejection > p,
+.crp-reason-body #BoxNotConclude > p {
+  display: none !important;
+}
+
+.crp-reason-body textarea {
+  width: 100% !important;
+  min-height: 120px;
+  padding: 10px 12px;
+  border: 1px solid #D7DEEA;
+  border-radius: 8px;
+  color: #22304F;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.crp-reason-body textarea:focus {
+  border-color: #1F3F8E;
+  outline: 3px solid rgba(31, 63, 142, 0.15);
+  box-shadow: none;
+}
+
+.crp-reason-body #BtnConfirmReason {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: 1px solid #1F3F8E;
+  border-radius: 8px;
+  background: #1F3F8E;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.crp-reason-body #BtnConfirmReason:hover,
+.crp-reason-body #BtnConfirmReason:focus-visible {
+  background: #18326F;
+  border-color: #18326F;
+}
+
+body.crp-reason-open {
+  overflow: hidden;
+}
