@@ -5259,7 +5259,7 @@ select.crp-select-aberto {
   overflow: auto;
   background: #FFFFFF;
   border-top: 4px solid var(--crp-reason-accent, #1F3F8E);
-  border-radius: 6px;
+  border-radius: 0;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
 }
 
@@ -5274,7 +5274,7 @@ select.crp-select-aberto {
 .crp-reason-title {
   flex: 1;
   margin: 0;
-  color: #111827;
+  color: #1C3557;
   font-size: 18px;
   font-weight: 700;
   line-height: 1.3;
@@ -5288,7 +5288,7 @@ select.crp-select-aberto {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #111827;
+  color: #1C3557;
   font-size: 24px;
   line-height: 1;
   cursor: pointer;
@@ -5302,7 +5302,7 @@ select.crp-select-aberto {
 
 .crp-reason-body {
   padding: 16px 22px 22px;
-  color: #111827;
+  color: #1C3557;
 }
 
 .crp-reason-body #BoxForceInputReason,
@@ -5327,7 +5327,7 @@ select.crp-select-aberto {
   padding: 10px 12px;
   border: 1px solid #D7DEEA;
   border-radius: 8px;
-  color: #111827;
+  color: #1C3557;
   font-size: 14px;
   line-height: 1.5;
   resize: vertical;
