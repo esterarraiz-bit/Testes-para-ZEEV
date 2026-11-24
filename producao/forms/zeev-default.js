@@ -2666,3 +2666,65 @@ document.addEventListener('DOMContentLoaded', () => {
     start();
   }
 })();
+
+(function () {
+  'use strict';
+
+  if (window.__crpAttentionModal) return;
+  window.__crpAttentionModal = true;
+
+  var gif = location.hostname.indexOf('hml') === 0
+    ? 'https://cdn.jsdelivr.net/gh/esterarraiz-bit/Testes-para-ZEEV@main/producao/images/avatar_erro.gif'
+    : 'https://cdn.jsdelivr.net/gh/AutomacaoCRPTech/zeev-assets@main/producao/images/avatar_erro.gif';
+
+  function apply() {
+    var modals = document.querySelectorAll('.modal.show');
+
+    for (var i = 0; i < modals.length; i++) {
+      var modal = modals[i];
+      var title = modal.querySelector('.modal-title');
+
+      if (!title || !/^(atenção|atencao|erro)$/i.test((title.textContent || '').trim())) {
+        continue;
+      }
+
+      modal.classList.add('crp-attention');
+
+      var body = modal.querySelector('.modal-body');
+      if (!body || body.querySelector('.crp-attention-body')) continue;
+
+      var wrap = document.createElement('div');
+      wrap.className = 'crp-attention-body';
+
+      var img = document.createElement('img');
+      img.className = 'crp-attention-avatar';
+      img.src = gif;
+      img.alt = 'Ilustração de atenção';
+
+      var text = document.createElement('div');
+      text.className = 'crp-attention-text';
+
+      while (body.firstChild) text.appendChild(body.firstChild);
+
+      wrap.appendChild(img);
+      wrap.appendChild(text);
+      body.appendChild(wrap);
+    }
+  }
+
+  function start() {
+    apply();
+    new MutationObserver(apply).observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();

@@ -5393,3 +5393,86 @@ select.crp-select-aberto {
 body.crp-reason-open {
   overflow: hidden;
 }
+
+body.pop .modal.show.crp-attention .modal-dialog {
+  max-width: 580px;
+}
+
+body.pop .modal.show.crp-attention .modal-content {
+  border: 1px solid #E3E8F3;
+  border-radius: 16px;
+  box-shadow: 0 18px 50px rgba(31, 63, 142, 0.18);
+  overflow: hidden;
+}
+
+body.pop .modal.show.crp-attention .modal-header {
+  padding: 18px 22px;
+  background: #F7F9FD;
+  border-bottom: 1px solid #EEF2F7;
+}
+
+body.pop .modal.show.crp-attention .modal-title {
+  color: #1C3557;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+body.pop .modal.show.crp-attention .modal-body {
+  padding: 20px 22px;
+  color: #526786;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body.pop .modal.show.crp-attention .modal-footer {
+  padding: 14px 22px;
+  border-top: 1px solid #EEF2F7;
+}
+
+body.pop .modal.show.crp-attention .modal-footer .btn {
+  padding: 9px 22px;
+  border-radius: 10px;
+  border-color: #1F3F8E;
+  background: #1F3F8E;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+body.pop .modal.show.crp-attention .modal-footer .btn:hover,
+body.pop .modal.show.crp-attention .modal-footer .btn:focus-visible {
+  border-color: #18326F;
+  background: #18326F;
+  color: #FFFFFF;
+}
+
+body.pop .crp-attention-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+body.pop .crp-attention-avatar {
+  flex: 0 0 150px;
+  width: 150px;
+  height: auto;
+  border-radius: 14px;
+  background: #FFFFFF;
+}
+
+body.pop .crp-attention-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 575px) {
+  body.pop .crp-attention-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  body.pop .crp-attention-avatar {
+    width: 130px;
+    flex-basis: 130px;
+  }
+}
