@@ -199,6 +199,8 @@
       }
 
       modal.classList.add('crp-attention');
+      modal.style.zIndex = '2147483647';
+      modal.style.position = 'fixed';
 
       var body = modal.querySelector('.modal-body');
       if(!body || body.querySelector('.crp-attention-body')) continue;
