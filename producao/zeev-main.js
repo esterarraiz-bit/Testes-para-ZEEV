@@ -167,11 +167,64 @@
 
   }
 
-  new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); estilizarErro(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
+  function estilizarAtencao(){
+    var modals = document.querySelectorAll('.modal.show');
+    for(var i = 0; i < modals.length; i++){
+      var modal = modals[i];
+      var title = modal.querySelector('.modal-title');
+      if(!title || !/^(atenção|atencao|erro)$/i.test((title.textContent || '').trim())) continue;
+
+      if(!document.getElementById('crp-attention-style')){
+        var style = document.createElement('style');
+        style.id = 'crp-attention-style';
+        style.textContent =
+          '.modal.show.crp-attention .modal-dialog{max-width:580px;}' +
+          '.modal.show.crp-attention .modal-content{border:1px solid #E3E8F3;border-radius:16px;box-shadow:0 18px 50px rgba(31,63,142,.18);overflow:hidden;}' +
+          '.modal.show.crp-attention .modal-header{padding:18px 22px;background:#F7F9FD;border-bottom:1px solid #EEF2F7;}' +
+          '.modal.show.crp-attention .modal-title{color:#1C3557;font-size:17px;font-weight:700;}' +
+          '.modal.show.crp-attention .modal-body{padding:20px 22px;color:#526786;font-size:14px;line-height:1.6;}' +
+          '.modal.show.crp-attention .modal-footer{padding:14px 22px;border-top:1px solid #EEF2F7;}' +
+          '.modal.show.crp-attention .modal-footer .btn{padding:9px 22px;border-radius:10px;border-color:#1F3F8E;background:#1F3F8E;color:#fff;font-weight:600;}' +
+          '.modal.show.crp-attention .modal-footer .btn:hover,.modal.show.crp-attention .modal-footer .btn:focus-visible{border-color:#18326F;background:#18326F;color:#fff;}' +
+          '.crp-attention-body{display:flex;align-items:flex-start;gap:18px;}' +
+          '.crp-attention-avatar{flex:0 0 150px;width:150px;height:auto;border-radius:14px;background:#fff;}' +
+          '.crp-attention-text{flex:1 1 auto;min-width:0;}' +
+          '@media(max-width:575px){.crp-attention-body{flex-direction:column;align-items:center;text-align:center;}.crp-attention-avatar{width:130px;flex-basis:130px;}}';
+        document.head.appendChild(style);
+      }
+
+      modal.classList.add('crp-attention');
+
+      var body = modal.querySelector('.modal-body');
+      if(!body || body.querySelector('.crp-attention-body')) continue;
+
+      var wrap = document.createElement('div');
+      wrap.className = 'crp-attention-body';
+
+      var img = document.createElement('img');
+      img.className = 'crp-attention-avatar';
+      img.alt = 'Ilustração de atenção';
+      img.src = location.hostname.indexOf('hml') === 0
+        ? 'https://cdn.jsdelivr.net/gh/esterarraiz-bit/Testes-para-ZEEV@main/producao/images/avatar_erro.gif'
+        : 'https://cdn.jsdelivr.net/gh/AutomacaoCRPTech/zeev-assets@main/producao/images/avatar_erro.gif';
+
+      var text = document.createElement('div');
+      text.className = 'crp-attention-text';
+
+      while(body.firstChild) text.appendChild(body.firstChild);
+
+      wrap.appendChild(img);
+      wrap.appendChild(text);
+      body.appendChild(wrap);
+    }
+  }
+
+  new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); estilizarErro(); estilizarAtencao(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
   estilizarLogin();
   estilizarNotificacoes();
   estilizarRelatorios();
   estilizarErro();
+  estilizarAtencao();
   setTimeout(inserirLogin, 600);
   setTimeout(inserirSuporte, 1000);
 })();
