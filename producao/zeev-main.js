@@ -181,7 +181,7 @@
         var style = document.createElement('style');
         style.id = 'crp-attention-style';
         style.textContent =
-          '.modal.show.crp-attention{background:rgba(15,23,42,.45) !important;}' +
+          '.modal.show.crp-attention{background:transparent !important;z-index:1060 !important;}' +
           '.modal.show.crp-attention .modal-dialog{max-width:580px;}' +
           '.modal.show.crp-attention .modal-content{border:1px solid #E3E8F3;border-radius:16px;box-shadow:0 18px 50px rgba(31,63,142,.18);overflow:hidden;}' +
           '.modal.show.crp-attention .modal-header{padding:18px 22px;background:#F7F9FD;border-bottom:1px solid #EEF2F7;}' +
@@ -222,6 +222,15 @@
       body.appendChild(wrap);
     }
 
+    var local = document.getElementById('crp-attention-backdrop-local');
+    if(found && !local){
+      local = document.createElement('div');
+      local.id = 'crp-attention-backdrop-local';
+      local.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:1050;background:rgba(15,23,42,.45);';
+      document.body.appendChild(local);
+    }
+    if(!found && local) local.remove();
+
     try{
       if(window.parent && window.parent !== window){
         var pd = window.parent.document;
@@ -229,7 +238,7 @@
         if(found && !bd){
           bd = pd.createElement('div');
           bd.id = 'crp-attention-backdrop';
-          bd.style.cssText = 'position:fixed;inset:0;z-index:1040;background:rgba(15,23,42,.45);';
+          bd.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:1050;background:rgba(15,23,42,.45);';
           pd.body.appendChild(bd);
         }
         if(!found && bd) bd.remove();
@@ -239,6 +248,8 @@
 
   window.addEventListener('beforeunload', function(){
     try{
+      var local = document.getElementById('crp-attention-backdrop-local');
+      if(local) local.remove();
       if(window.parent && window.parent !== window){
         var bd = window.parent.document.getElementById('crp-attention-backdrop');
         if(bd) bd.remove();
