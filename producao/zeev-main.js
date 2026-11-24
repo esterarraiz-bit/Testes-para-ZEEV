@@ -234,11 +234,16 @@
     try{
       if(window.parent && window.parent !== window){
         var pd = window.parent.document;
+        var frame = window.frameElement;
+        if(frame){
+          frame.style.position = 'relative';
+          frame.style.zIndex = '1040';
+        }
         var bd = pd.getElementById('crp-attention-backdrop');
         if(found && !bd){
           bd = pd.createElement('div');
           bd.id = 'crp-attention-backdrop';
-          bd.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:1050;background:rgba(15,23,42,.45);';
+          bd.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:1030;background:rgba(15,23,42,.45);';
           pd.body.appendChild(bd);
         }
         if(!found && bd) bd.remove();
