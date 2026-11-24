@@ -1,0 +1,109 @@
+body:has(#pTechnical){
+  background:#FFFFFF !important;
+  font-family:Roboto,"Segoe UI",Arial,sans-serif !important;
+}
+
+body:has(#pTechnical) form#frm>.bg-white.padded{
+  padding:0 !important;
+  background:#FFFFFF !important;
+}
+
+body:has(#pTechnical) form#frm>.bg-white.padded>.row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(24px,4vw,48px);
+  width:100%;
+  max-width:none;
+  min-height:100vh;
+  margin:0 !important;
+  padding:clamp(28px,5vw,56px);
+  background:#FFFFFF !important;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+}
+
+body:has(#pTechnical) form#frm .col-7{
+  flex:0 1 760px;
+  max-width:760px;
+  padding:0;
+}
+
+body:has(#pTechnical) form#frm .col-5{
+  flex:0 1 520px;
+  max-width:520px;
+  padding:0;
+  order:2;
+  text-align:center;
+}
+
+body:has(#pTechnical) form#frm .col-5 img{
+  width:min(500px,100%);
+  height:auto;
+  margin:0 auto !important;
+  border-radius:0;
+  background:#FFFFFF;
+}
+
+body:has(#pTechnical) form#frm h1{
+  color:#1C3557 !important;
+  font-size:clamp(2.2rem,3.6vw,3.2rem) !important;
+  font-weight:800 !important;
+  line-height:1.12 !important;
+  letter-spacing:-.02em;
+  margin-bottom:18px !important;
+}
+
+body:has(#pTechnical) form#frm h3{
+  color:#526786 !important;
+  font-size:clamp(1.15rem,1.6vw,1.45rem) !important;
+  line-height:1.55 !important;
+  font-weight:500 !important;
+  margin-bottom:30px !important;
+  max-width:700px;
+}
+
+body:has(#pTechnical) form#frm .btn-close,
+body:has(#pTechnical) form#frm .btn-back{
+  background:#1F3F8E !important;
+  border-color:#1F3F8E !important;
+  color:#fff !important;
+  border-radius:12px !important;
+  padding:12px 28px !important;
+  font-size:15px !important;
+  font-weight:600 !important;
+  box-shadow:0 8px 20px rgba(31,63,142,.18) !important;
+}
+
+body:has(#pTechnical) form#frm .btn-close:hover,
+body:has(#pTechnical) form#frm .btn-close:focus-visible,
+body:has(#pTechnical) form#frm .btn-back:hover,
+body:has(#pTechnical) form#frm .btn-back:focus-visible{
+  background:#18326F !important;
+  border-color:#18326F !important;
+}
+
+body:has(#pTechnical) #pTechnical{
+  color:#6B83B5 !important;
+  font-size:13px !important;
+}
+
+body:has(#pTechnical) #pTechnical a{
+  color:#1F3F8E !important;
+  text-decoration:underline;
+}
+
+body:has(#pTechnical) #technicalInfo{
+  color:#526786 !important;
+}
+
+@media(max-width:767px){
+  body:has(#pTechnical) form#frm>.bg-white.padded>.row{
+    flex-direction:column;
+    text-align:center;
+    padding:28px 20px;
+  }
+  body:has(#pTechnical) form#frm .col-5{order:-1;}
+  body:has(#pTechnical) form#frm h3{margin-left:auto;margin-right:auto;}
+}
