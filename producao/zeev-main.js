@@ -137,12 +137,12 @@
       var style = document.createElement('style');
       style.id = 'crp-error-style';
       style.textContent =
-        'body.crp-error-page{background:#F3F6FB !important;font-family:Roboto,"Segoe UI",Arial,sans-serif !important;}' +
-        'body.crp-error-page form#frm>.bg-white.padded{padding:24px !important;background:transparent !important;}' +
-        'body.crp-error-page form#frm>.bg-white.padded>.row{display:flex;align-items:center;gap:clamp(24px,4vw,56px);max-width:980px;margin:24px auto !important;padding:clamp(24px,4vw,48px);background:radial-gradient(circle at 88% 12%,#EAF0FF 0,rgba(234,240,255,0) 38%),#fff;border:1px solid #E3E8F3;border-radius:24px;box-shadow:0 24px 70px rgba(31,63,142,.14);}' +
+        'body.crp-error-page{background:#FFFFFF !important;font-family:Roboto,"Segoe UI",Arial,sans-serif !important;}' +
+        'body.crp-error-page form#frm>.bg-white.padded{padding:0 !important;background:#FFFFFF !important;}' +
+        'body.crp-error-page form#frm>.bg-white.padded>.row{display:flex;align-items:center;justify-content:center;gap:clamp(24px,5vw,64px);width:100%;max-width:none;min-height:100vh;margin:0 !important;padding:clamp(32px,6vw,72px);background:#FFFFFF !important;border:0;border-radius:0;box-shadow:none;}' +
         'body.crp-error-page form#frm .col-7,body.crp-error-page form#frm .col-5{flex:1 1 0;max-width:none;padding:0;}' +
         'body.crp-error-page form#frm .col-5{order:2;text-align:center;}' +
-        'body.crp-error-page form#frm .col-5 img{width:min(300px,100%);height:auto;margin:0 auto !important;border-radius:24px;background:#F5F7FC;}' +
+        'body.crp-error-page form#frm .col-5 img{width:min(300px,100%);height:auto;margin:0 auto !important;border-radius:0;background:#FFFFFF;}' +
         'body.crp-error-page form#frm h1{color:#1C3557 !important;font-size:clamp(1.8rem,3vw,2.35rem) !important;font-weight:800 !important;line-height:1.15 !important;letter-spacing:-.02em;margin-bottom:14px !important;}' +
         'body.crp-error-page form#frm h3{color:#526786 !important;font-size:1rem !important;line-height:1.65 !important;font-weight:500 !important;margin-bottom:26px !important;max-width:560px;}' +
         'body.crp-error-page form#frm .btn-close,body.crp-error-page form#frm .btn-back{background:#1F3F8E !important;border-color:#1F3F8E !important;color:#fff !important;border-radius:12px !important;padding:11px 24px !important;font-weight:600 !important;box-shadow:0 8px 20px rgba(31,63,142,.18) !important;}' +
