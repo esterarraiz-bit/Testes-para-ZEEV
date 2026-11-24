@@ -164,54 +164,6 @@
       img.classList.add('crp-error-avatar');
     }
 
-    try{
-      if(window.parent && window.parent !== window && window.frameElement){
-        var frame = window.frameElement;
-        var pwin = window.parent;
-        var targetW = Math.min(900, Math.max(560, pwin.innerWidth - 40));
-        var targetH = Math.min(620, Math.max(420, pwin.innerHeight - 40));
-        var pxW = targetW + 'px';
-        var pxH = targetH + 'px';
-
-        frame.style.width = pxW;
-        frame.style.height = pxH;
-        frame.style.maxWidth = 'calc(100vw - 40px)';
-        frame.style.maxHeight = 'calc(100vh - 40px)';
-
-        var pd = pwin.document;
-        if(!pd.getElementById('crp-error-parent-style')){
-          var ps = pd.createElement('style');
-          ps.id = 'crp-error-parent-style';
-          ps.textContent =
-            '#colorbox{position:fixed !important;left:50% !important;top:50% !important;transform:translate(-50%,-50%) !important;max-width:calc(100vw - 40px) !important;max-height:calc(100vh - 40px) !important;}' +
-            '#cboxOverlay{position:fixed !important;inset:0 !important;width:100vw !important;height:100vh !important;}' +
-            '.modal-dialog{max-width:900px !important;margin:1.75rem auto !important;}';
-          pd.head.appendChild(ps);
-        }
-
-        ['colorbox','cboxWrapper','cboxContent','cboxLoadedContent'].forEach(function(id){
-          var el = pd.getElementById(id);
-          if(!el) return;
-          el.style.width = pxW;
-          el.style.height = pxH;
-          el.style.maxWidth = 'calc(100vw - 40px)';
-          el.style.maxHeight = 'calc(100vh - 40px)';
-        });
-
-        var node = frame;
-        for(var i = 0; i < 6 && node; i++){
-          node = node.parentElement;
-          if(!node) break;
-          var cls = String(node.className || '');
-          if(/modal|colorbox|cbox|dialog/i.test(cls)){
-            node.style.width = pxW;
-            node.style.height = pxH;
-            node.style.maxWidth = 'calc(100vw - 40px)';
-            node.style.maxHeight = 'calc(100vh - 40px)';
-          }
-        }
-      }
-    }catch(e){}
   }
 
   new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); estilizarErro(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
