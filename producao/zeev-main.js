@@ -179,6 +179,16 @@
         frame.style.maxHeight = 'calc(100vh - 40px)';
 
         var pd = pwin.document;
+        if(!pd.getElementById('crp-error-parent-style')){
+          var ps = pd.createElement('style');
+          ps.id = 'crp-error-parent-style';
+          ps.textContent =
+            '#colorbox{position:fixed !important;left:50% !important;top:50% !important;transform:translate(-50%,-50%) !important;max-width:calc(100vw - 40px) !important;max-height:calc(100vh - 40px) !important;}' +
+            '#cboxOverlay{position:fixed !important;inset:0 !important;width:100vw !important;height:100vh !important;}' +
+            '.modal-dialog{max-width:900px !important;margin:1.75rem auto !important;}';
+          pd.head.appendChild(ps);
+        }
+
         ['colorbox','cboxWrapper','cboxContent','cboxLoadedContent'].forEach(function(id){
           var el = pd.getElementById(id);
           if(!el) return;
