@@ -237,8 +237,13 @@
         var pd = window.parent.document;
         var frame = window.frameElement;
         if(frame){
-          frame.style.position = 'relative';
-          frame.style.zIndex = '2147483646';
+          if(found){
+            frame.style.position = 'relative';
+            frame.style.zIndex = '2147483646';
+          } else if(frame.style.zIndex === '2147483646'){
+            frame.style.position = '';
+            frame.style.zIndex = '';
+          }
         }
         var bd = pd.getElementById('crp-attention-backdrop');
         if(found && !bd){
