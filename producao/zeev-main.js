@@ -127,10 +127,49 @@
     parent.after(clone);
   }
 
-  new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
+  function estilizarErro(){
+    if(location.pathname.toLowerCase().indexOf('werrorcontrol.aspx') < 0) return;
+    if(!document.body || !document.getElementById('frm')) return;
+
+    document.body.classList.add('crp-error-page');
+
+    if(!document.getElementById('crp-error-style')){
+      var style = document.createElement('style');
+      style.id = 'crp-error-style';
+      style.textContent =
+        'body.crp-error-page{background:#F3F6FB !important;font-family:Roboto,"Segoe UI",Arial,sans-serif !important;}' +
+        'body.crp-error-page form#frm>.bg-white.padded{padding:24px !important;background:transparent !important;}' +
+        'body.crp-error-page form#frm>.bg-white.padded>.row{display:flex;align-items:center;gap:clamp(24px,4vw,56px);max-width:980px;margin:24px auto !important;padding:clamp(24px,4vw,48px);background:radial-gradient(circle at 88% 12%,#EAF0FF 0,rgba(234,240,255,0) 38%),#fff;border:1px solid #E3E8F3;border-radius:24px;box-shadow:0 24px 70px rgba(31,63,142,.14);}' +
+        'body.crp-error-page form#frm .col-7,body.crp-error-page form#frm .col-5{flex:1 1 0;max-width:none;padding:0;}' +
+        'body.crp-error-page form#frm .col-5{order:2;text-align:center;}' +
+        'body.crp-error-page form#frm .col-5 img{width:min(300px,100%);height:auto;margin:0 auto !important;border-radius:24px;background:#F5F7FC;}' +
+        'body.crp-error-page form#frm h1{color:#1C3557 !important;font-size:clamp(1.8rem,3vw,2.35rem) !important;font-weight:800 !important;line-height:1.15 !important;letter-spacing:-.02em;margin-bottom:14px !important;}' +
+        'body.crp-error-page form#frm h3{color:#526786 !important;font-size:1rem !important;line-height:1.65 !important;font-weight:500 !important;margin-bottom:26px !important;max-width:560px;}' +
+        'body.crp-error-page form#frm .btn-close,body.crp-error-page form#frm .btn-back{background:#1F3F8E !important;border-color:#1F3F8E !important;color:#fff !important;border-radius:12px !important;padding:11px 24px !important;font-weight:600 !important;box-shadow:0 8px 20px rgba(31,63,142,.18) !important;}' +
+        'body.crp-error-page form#frm .btn-close:hover,body.crp-error-page form#frm .btn-close:focus-visible,body.crp-error-page form#frm .btn-back:hover,body.crp-error-page form#frm .btn-back:focus-visible{background:#18326F !important;border-color:#18326F !important;}' +
+        'body.crp-error-page #pTechnical{color:#6B83B5 !important;font-size:12px !important;}' +
+        'body.crp-error-page #pTechnical a{color:#1F3F8E !important;text-decoration:underline;}' +
+        'body.crp-error-page #technicalInfo{color:#526786 !important;}' +
+        '@media(max-width:767px){body.crp-error-page form#frm>.bg-white.padded>.row{flex-direction:column;text-align:center;padding:28px 20px;}body.crp-error-page form#frm .col-5{order:-1;}body.crp-error-page form#frm h3{margin-left:auto;margin-right:auto;}}';
+      document.head.appendChild(style);
+    }
+
+    var img = document.querySelector('form#frm .col-5 img');
+    if(img){
+      var gif = location.hostname.indexOf('hml') === 0
+        ? 'https://cdn.jsdelivr.net/gh/esterarraiz-bit/Testes-para-ZEEV@main/producao/images/avatar_erro.gif'
+        : 'https://cdn.jsdelivr.net/gh/AutomacaoCRPTech/zeev-assets@main/producao/images/avatar_erro.gif';
+      if(img.getAttribute('src') !== gif) img.setAttribute('src', gif);
+      img.setAttribute('alt', 'Ilustração de erro');
+      img.classList.add('crp-error-avatar');
+    }
+  }
+
+  new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); estilizarErro(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
   estilizarLogin();
   estilizarNotificacoes();
   estilizarRelatorios();
+  estilizarErro();
   setTimeout(inserirLogin, 600);
   setTimeout(inserirSuporte, 1000);
 })();
