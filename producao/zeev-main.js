@@ -169,15 +169,19 @@
 
   function estilizarAtencao(){
     var modals = document.querySelectorAll('.modal.show');
+    var found = false;
+
     for(var i = 0; i < modals.length; i++){
       var modal = modals[i];
       var title = modal.querySelector('.modal-title');
       if(!title || !/^(atenção|atencao|erro)$/i.test((title.textContent || '').trim())) continue;
+      found = true;
 
       if(!document.getElementById('crp-attention-style')){
         var style = document.createElement('style');
         style.id = 'crp-attention-style';
         style.textContent =
+          '.modal.show.crp-attention{background:rgba(15,23,42,.45) !important;}' +
           '.modal.show.crp-attention .modal-dialog{max-width:580px;}' +
           '.modal.show.crp-attention .modal-content{border:1px solid #E3E8F3;border-radius:16px;box-shadow:0 18px 50px rgba(31,63,142,.18);overflow:hidden;}' +
           '.modal.show.crp-attention .modal-header{padding:18px 22px;background:#F7F9FD;border-bottom:1px solid #EEF2F7;}' +
@@ -217,7 +221,30 @@
       wrap.appendChild(text);
       body.appendChild(wrap);
     }
+
+    try{
+      if(window.parent && window.parent !== window){
+        var pd = window.parent.document;
+        var bd = pd.getElementById('crp-attention-backdrop');
+        if(found && !bd){
+          bd = pd.createElement('div');
+          bd.id = 'crp-attention-backdrop';
+          bd.style.cssText = 'position:fixed;inset:0;z-index:1040;background:rgba(15,23,42,.45);';
+          pd.body.appendChild(bd);
+        }
+        if(!found && bd) bd.remove();
+      }
+    }catch(e){}
   }
+
+  window.addEventListener('beforeunload', function(){
+    try{
+      if(window.parent && window.parent !== window){
+        var bd = window.parent.document.getElementById('crp-attention-backdrop');
+        if(bd) bd.remove();
+      }
+    }catch(e){}
+  });
 
   new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); estilizarErro(); estilizarAtencao(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
   estilizarLogin();
