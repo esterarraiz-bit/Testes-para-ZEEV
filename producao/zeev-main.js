@@ -173,6 +173,7 @@
 
     for(var i = 0; i < modals.length; i++){
       var modal = modals[i];
+      if(getComputedStyle(modal).display === 'none' || !modal.offsetWidth || !modal.offsetHeight) continue;
       var title = modal.querySelector('.modal-title');
       if(!title || !/^(atenção|atencao|erro)$/i.test((title.textContent || '').trim())) continue;
       found = true;
