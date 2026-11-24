@@ -247,14 +247,15 @@
             frame.style.zIndex = '';
           }
         }
+        var parentModal = frame && frame.closest ? frame.closest('.modal') : null;
         var bd = pd.getElementById('crp-attention-backdrop');
-        if(found && !bd){
+        if(found && !bd && !parentModal){
           bd = pd.createElement('div');
           bd.id = 'crp-attention-backdrop';
           bd.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483645;background:rgba(15,23,42,.45);';
           pd.body.appendChild(bd);
         }
-        if(!found && bd) bd.remove();
+        if((!found || parentModal) && bd) bd.remove();
       }
     }catch(e){}
   }
