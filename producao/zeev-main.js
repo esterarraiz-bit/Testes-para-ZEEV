@@ -142,7 +142,7 @@
         'body.crp-error-page form#frm>.bg-white.padded>.row{display:flex;align-items:center;justify-content:center;gap:clamp(24px,5vw,64px);width:100%;max-width:none;min-height:100vh;margin:0 !important;padding:clamp(32px,6vw,72px);background:#FFFFFF !important;border:0;border-radius:0;box-shadow:none;}' +
         'body.crp-error-page form#frm .col-7,body.crp-error-page form#frm .col-5{flex:1 1 0;max-width:none;padding:0;}' +
         'body.crp-error-page form#frm .col-5{order:2;text-align:center;}' +
-        'body.crp-error-page form#frm .col-5 img{width:min(300px,100%);height:auto;margin:0 auto !important;border-radius:0;background:#FFFFFF;}' +
+        'body.crp-error-page form#frm .col-5 img{width:min(420px,100%);height:auto;margin:0 auto !important;border-radius:0;background:#FFFFFF;}' +
         'body.crp-error-page form#frm h1{color:#1C3557 !important;font-size:clamp(1.8rem,3vw,2.35rem) !important;font-weight:800 !important;line-height:1.15 !important;letter-spacing:-.02em;margin-bottom:14px !important;}' +
         'body.crp-error-page form#frm h3{color:#526786 !important;font-size:1rem !important;line-height:1.65 !important;font-weight:500 !important;margin-bottom:26px !important;max-width:560px;}' +
         'body.crp-error-page form#frm .btn-close,body.crp-error-page form#frm .btn-back{background:#1F3F8E !important;border-color:#1F3F8E !important;color:#fff !important;border-radius:12px !important;padding:11px 24px !important;font-weight:600 !important;box-shadow:0 8px 20px rgba(31,63,142,.18) !important;}' +
@@ -163,6 +163,45 @@
       img.setAttribute('alt', 'Ilustração de erro');
       img.classList.add('crp-error-avatar');
     }
+
+    try{
+      if(window.parent && window.parent !== window && window.frameElement){
+        var frame = window.frameElement;
+        var pwin = window.parent;
+        var targetW = Math.min(900, Math.max(560, pwin.innerWidth - 40));
+        var targetH = Math.min(620, Math.max(420, pwin.innerHeight - 40));
+        var pxW = targetW + 'px';
+        var pxH = targetH + 'px';
+
+        frame.style.width = pxW;
+        frame.style.height = pxH;
+        frame.style.maxWidth = 'calc(100vw - 40px)';
+        frame.style.maxHeight = 'calc(100vh - 40px)';
+
+        var pd = pwin.document;
+        ['colorbox','cboxWrapper','cboxContent','cboxLoadedContent'].forEach(function(id){
+          var el = pd.getElementById(id);
+          if(!el) return;
+          el.style.width = pxW;
+          el.style.height = pxH;
+          el.style.maxWidth = 'calc(100vw - 40px)';
+          el.style.maxHeight = 'calc(100vh - 40px)';
+        });
+
+        var node = frame;
+        for(var i = 0; i < 6 && node; i++){
+          node = node.parentElement;
+          if(!node) break;
+          var cls = String(node.className || '');
+          if(/modal|colorbox|cbox|dialog/i.test(cls)){
+            node.style.width = pxW;
+            node.style.height = pxH;
+            node.style.maxWidth = 'calc(100vw - 40px)';
+            node.style.maxHeight = 'calc(100vh - 40px)';
+          }
+        }
+      }
+    }catch(e){}
   }
 
   new MutationObserver(function(){ estilizarLogin(); estilizarNotificacoes(); estilizarRelatorios(); estilizarErro(); inserirLogin(); inserirSuporte(); }).observe(document.body, {childList: true, subtree: true});
